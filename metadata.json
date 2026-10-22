@@ -1,0 +1,6 @@
+{
+  "name": "RemindMe – Vehicle Service & Insurance Reminder System",
+  "description": "Automated vehicle service, insurance renewal, and PUC reminder platform for car dealerships and vehicle owners.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
