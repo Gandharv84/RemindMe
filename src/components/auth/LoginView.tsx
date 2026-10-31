@@ -192,13 +192,13 @@ export const LoginView: React.FC = () => {
               type="button"
               onClick={() => {
                 setLoginMode('CUSTOMER');
-                setCustomerIdentifier('sophia.m@example.com');
+                setCustomerIdentifier('mahesh@example.com');
                 setPassword('Customer@123456');
                 setError(null);
               }}
               className="px-2.5 py-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-[#FFF3EC] hover:border-[#F07836] text-[11px] font-medium text-slate-700 hover:text-[#F07836] transition-colors text-center cursor-pointer"
             >
-              Fill Customer Portal
+              Fill Customer (Mahesh)
             </button>
           </div>
           <p className="text-[10px] text-slate-400 text-center mt-2">

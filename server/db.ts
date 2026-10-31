@@ -98,9 +98,9 @@ class RemindMeDatabase {
       id: 'cust-demo-01',
       showroomId: this.showrooms[0].id,
       customerCode: 'CUST-2026-001',
-      name: 'Sophia Martinez',
+      name: 'Mahesh',
       phone: '+15552345678',
-      email: 'sophia.m@example.com',
+      email: 'mahesh@example.com',
       address: '42 Marine Drive',
       city: 'Mumbai',
       pincode: '400020',
@@ -362,7 +362,24 @@ class RemindMeDatabase {
   public getCustomerByPhoneOrEmail(identifier: string): CustomerAccount | undefined {
     const cleanId = identifier.trim().toLowerCase();
     const digits = cleanId.replace(/[^0-9]/g, '');
-    return this.customers.find(c => c.email.toLowerCase() === cleanId || (digits.length >= 6 && c.phone.replace(/[^0-9]/g, '') === digits));
+    const found = this.customers.find(c =>
+      c.email.toLowerCase() === cleanId ||
+      c.name.toLowerCase() === cleanId ||
+      (cleanId === 'sophia.m@example.com' && c.id === 'cust-demo-01') ||
+      (cleanId === 'sophia' && c.id === 'cust-demo-01') ||
+      (cleanId === 'mahesh' && c.id === 'cust-demo-01') ||
+      (digits.length >= 6 && c.phone.replace(/[^0-9]/g, '') === digits)
+    );
+    if (found) return found;
+
+    const cleanPlate = cleanId.replace(/[^a-z0-9]/g, '');
+    if (cleanPlate.length >= 4) {
+      const vehicle = this.vehicles.find(v => v.registrationNumber.toLowerCase().replace(/[^a-z0-9]/g, '') === cleanPlate);
+      if (vehicle) {
+        return this.customers.find(c => c.id === vehicle.customerId);
+      }
+    }
+    return undefined;
   }
 
   public async addCustomer(data: Omit<CustomerAccount, 'id' | 'customerCode' | 'createdAt' | 'updatedAt'>): Promise<CustomerAccount> {
