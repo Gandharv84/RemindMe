@@ -22,6 +22,7 @@ const tableByCollection = {
 export type CollectionName = keyof typeof tableByCollection;
 
 export async function migrateAndSeed(seed: { showrooms: Showroom[] }, seedEmployee?: EmployeeAccount) {
+  if (!process.env.DATABASE_URL) return;
   const migrationDirectory = path.resolve(process.cwd(), 'server/migrations');
   const files = (await readdir(migrationDirectory)).filter(name => /^\d+_[a-z0-9_-]+\.sql$/i.test(name)).sort();
   const client = await pool.connect();
