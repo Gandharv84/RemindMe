@@ -97,6 +97,7 @@ async function upsertOn(client: PoolClient, table: string, record: PersistedReco
 }
 
 export async function upsertRecord(collection: CollectionName, record: PersistedRecord) {
+  if (!process.env.DATABASE_URL) return;
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
@@ -109,16 +110,18 @@ export async function upsertRecord(collection: CollectionName, record: Persisted
 }
 
 export async function loadCollection<T extends PersistedRecord>(collection: CollectionName): Promise<T[]> {
+  if (!process.env.DATABASE_URL) return [];
   const result = await pool.query<{ payload: T }>(`SELECT payload FROM ${tableByCollection[collection]} ORDER BY id`);
   return result.rows.map(row => row.payload);
 }
 
 export async function deleteDemoData() {
+  if (!process.env.DATABASE_URL) return;
   await pool.query('TRUNCATE service_requests, notifications, reminders, documents, insurance_policies, services, vehicles, customers RESTART IDENTITY CASCADE');
 }
 
 export async function acquireReminderLock(): Promise<(() => Promise<void>) | null> {
-  if (process.env.NODE_ENV === 'test') return async () => undefined;
+  if (process.env.NODE_ENV === 'test' || !process.env.DATABASE_URL) return async () => undefined;
   const client = await pool.connect();
   try {
     const result = await client.query<{ locked: boolean }>('SELECT pg_try_advisory_lock(741205032) AS locked');
@@ -134,6 +137,7 @@ export async function acquireReminderLock(): Promise<(() => Promise<void>) | nul
 }
 
 export async function acquireSingleInstanceLock() {
+  if (!process.env.DATABASE_URL) return;
   const client = await pool.connect();
   try {
     const result = await client.query<{ locked: boolean }>('SELECT pg_try_advisory_lock(741205030) AS locked');
@@ -155,5 +159,7 @@ export async function releaseSingleInstanceLock() {
 
 export async function closePool() {
   await releaseSingleInstanceLock();
-  await pool.end();
+  if (process.env.DATABASE_URL) {
+    try { await pool.end(); } catch { /* ignore */ }
+  }
 }

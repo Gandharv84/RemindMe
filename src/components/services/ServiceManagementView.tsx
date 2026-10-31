@@ -189,7 +189,7 @@ export const ServiceManagementView: React.FC = () => {
 
         <button
           onClick={handleOpenAdd}
-          className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold flex items-center gap-2 shadow-md shadow-blue-600/20 transition-all self-start sm:self-auto"
+          className="px-4 py-2.5 rounded-xl bg-[#F07836] hover:bg-[#E06725] text-white text-xs font-bold flex items-center gap-2 shadow-md shadow-[#F07836]/25 transition-all self-start sm:self-auto"
         >
           <Plus className="w-4 h-4" />
           <span>Log New Service Job</span>
@@ -205,7 +205,7 @@ export const ServiceManagementView: React.FC = () => {
             placeholder="Search by registration number, customer, invoice no, or service type..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
+            className="w-full pl-10 pr-4 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#F07836] focus:border-[#F07836] focus:bg-white transition-all"
           />
         </div>
 
@@ -214,7 +214,7 @@ export const ServiceManagementView: React.FC = () => {
           <select
             value={statusFilter}
             onChange={e => setStatusFilter(e.target.value)}
-            className="text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-[#F07836] focus:border-[#F07836]"
           >
             <option value="ALL">All Service Statuses</option>
             <option value="COMPLETED">Completed</option>
@@ -293,7 +293,7 @@ export const ServiceManagementView: React.FC = () => {
                     <td className="py-3.5 px-4">
                       <div className="space-y-0.5">
                         <div className="font-semibold text-slate-800 flex items-center gap-1">
-                          <Calendar className="w-3 h-3 text-blue-500" />
+                          <Calendar className="w-3 h-3 text-[#F07836]" />
                           <span>{s.nextServiceDate || 'Not set'}</span>
                         </div>
                         {s.nextServiceOdometer && (
@@ -307,7 +307,7 @@ export const ServiceManagementView: React.FC = () => {
                     <td className="py-3.5 px-4">
                       <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${
                         s.status === 'COMPLETED' ? 'bg-emerald-100 text-emerald-800' :
-                        s.status === 'IN_PROGRESS' ? 'bg-blue-100 text-blue-800' :
+                        s.status === 'IN_PROGRESS' ? 'bg-[#FFF3EC] text-[#D95D1E] border border-[#FCD4BE]' :
                         s.status === 'SCHEDULED' ? 'bg-amber-100 text-amber-800' :
                         'bg-rose-100 text-rose-800'
                       }`}>
@@ -343,9 +343,9 @@ export const ServiceManagementView: React.FC = () => {
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs">
           <div className="bg-white rounded-2xl w-full max-w-2xl shadow-2xl border border-slate-200 overflow-hidden text-slate-900 max-h-[90vh] flex flex-col">
-            <div className="p-5 bg-slate-900 text-white flex items-center justify-between">
+            <div className="p-5 bg-[#262B33] text-white flex items-center justify-between border-b border-[#333944]">
               <div className="flex items-center gap-2.5">
-                <Wrench className="w-5 h-5 text-blue-400" />
+                <Wrench className="w-5 h-5 text-[#F07836]" />
                 <h3 className="font-bold text-sm">Log New Vehicle Service Job</h3>
               </div>
               <button
@@ -366,7 +366,7 @@ export const ServiceManagementView: React.FC = () => {
                     required
                     value={formData.vehicleId}
                     onChange={e => handleVehicleSelectChange(e.target.value)}
-                    className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white font-medium"
+                    className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#F07836] focus:border-[#F07836] focus:outline-none bg-white font-medium"
                   >
                     {vehicles.map(v => (
                       <option key={v.id} value={v.id}>
@@ -381,7 +381,7 @@ export const ServiceManagementView: React.FC = () => {
                   <select
                     value={formData.serviceType}
                     onChange={e => setFormData({ ...formData, serviceType: e.target.value as any })}
-                    className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white"
+                    className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#F07836] focus:border-[#F07836] focus:outline-none bg-white"
                   >
                     <option value="PERIODIC_MAINTENANCE">Periodic General Maintenance</option>
                     <option value="FIRST_FREE">1st Free Inspection Service</option>
@@ -400,7 +400,7 @@ export const ServiceManagementView: React.FC = () => {
                     required
                     value={formData.serviceDate}
                     onChange={e => setFormData({ ...formData, serviceDate: e.target.value })}
-                    className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none font-mono"
+                    className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#F07836] focus:border-[#F07836] focus:outline-none font-mono"
                   />
                 </div>
 
@@ -418,7 +418,7 @@ export const ServiceManagementView: React.FC = () => {
                         nextServiceOdometer: odo + 10000
                       });
                     }}
-                    className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none font-mono"
+                    className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#F07836] focus:border-[#F07836] focus:outline-none font-mono"
                   />
                 </div>
 
@@ -429,7 +429,7 @@ export const ServiceManagementView: React.FC = () => {
                     required
                     value={formData.cost}
                     onChange={e => setFormData({ ...formData, cost: Number(e.target.value) })}
-                    className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none font-mono"
+                    className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#F07836] focus:border-[#F07836] focus:outline-none font-mono"
                   />
                 </div>
 
@@ -439,7 +439,7 @@ export const ServiceManagementView: React.FC = () => {
                     type="text"
                     value={formData.invoiceNumber}
                     onChange={e => setFormData({ ...formData, invoiceNumber: e.target.value })}
-                    className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none font-mono"
+                    className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#F07836] focus:border-[#F07836] focus:outline-none font-mono"
                   />
                 </div>
 
@@ -448,7 +448,7 @@ export const ServiceManagementView: React.FC = () => {
                   <select
                     value={formData.status}
                     onChange={e => setFormData({ ...formData, status: e.target.value as any })}
-                    className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white"
+                    className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#F07836] focus:border-[#F07836] focus:outline-none bg-white"
                   >
                     <option value="COMPLETED">Completed (Triggers Next Schedule Update)</option>
                     <option value="IN_PROGRESS">In Progress (Bay Active)</option>
@@ -463,7 +463,7 @@ export const ServiceManagementView: React.FC = () => {
                     placeholder="e.g. Engine Oil, Oil Filter, Brake Pads"
                     value={formData.partsReplaced}
                     onChange={e => setFormData({ ...formData, partsReplaced: e.target.value })}
-                    className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#F07836] focus:border-[#F07836] focus:outline-none"
                   />
                 </div>
 
@@ -473,33 +473,33 @@ export const ServiceManagementView: React.FC = () => {
                     rows={2}
                     value={formData.advisorNotes}
                     onChange={e => setFormData({ ...formData, advisorNotes: e.target.value })}
-                    className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none resize-none"
+                    className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#F07836] focus:border-[#F07836] focus:outline-none resize-none"
                   />
                 </div>
 
                 {/* Auto Calculated Next Service Schedule */}
-                <div className="sm:col-span-2 p-3.5 bg-blue-50/70 border border-blue-200 rounded-xl grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="sm:col-span-2 p-3.5 bg-[#FFF3EC]/80 border border-[#FCD4BE] rounded-xl grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block font-bold text-blue-900 mb-1 text-[11px]">
+                    <label className="block font-bold text-[#D95D1E] mb-1 text-[11px]">
                       Automated Next Service Due Date (+6 Months)
                     </label>
                     <input
                       type="date"
                       value={formData.nextServiceDate}
                       onChange={e => setFormData({ ...formData, nextServiceDate: e.target.value })}
-                      className="w-full px-3 py-1.5 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none font-mono bg-white text-xs"
+                      className="w-full px-3 py-1.5 border border-[#FCD4BE] rounded-lg focus:ring-2 focus:ring-[#F07836] focus:border-[#F07836] focus:outline-none font-mono bg-white text-xs"
                     />
                   </div>
 
                   <div>
-                    <label className="block font-bold text-blue-900 mb-1 text-[11px]">
+                    <label className="block font-bold text-[#D95D1E] mb-1 text-[11px]">
                       Next Service Odometer (+10,000 km)
                     </label>
                     <input
                       type="number"
                       value={formData.nextServiceOdometer}
                       onChange={e => setFormData({ ...formData, nextServiceOdometer: Number(e.target.value) })}
-                      className="w-full px-3 py-1.5 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none font-mono bg-white text-xs"
+                      className="w-full px-3 py-1.5 border border-[#FCD4BE] rounded-lg focus:ring-2 focus:ring-[#F07836] focus:border-[#F07836] focus:outline-none font-mono bg-white text-xs"
                     />
                   </div>
                 </div>
@@ -515,7 +515,7 @@ export const ServiceManagementView: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold shadow-md shadow-blue-600/20"
+                  className="px-5 py-2 rounded-xl bg-[#F07836] hover:bg-[#E06725] text-white font-bold shadow-md shadow-[#F07836]/25"
                 >
                   Save Service Record
                 </button>

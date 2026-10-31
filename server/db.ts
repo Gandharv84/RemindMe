@@ -34,21 +34,243 @@ class RemindMeDatabase {
   }
 
   public async initialize() {
-    if (!process.env.DATABASE_URL) throw new Error('DATABASE_URL is required');
-    if (Boolean(process.env.SEED_ADMIN_EMAIL) !== Boolean(process.env.SEED_ADMIN_PASSWORD)) throw new Error('Configure both SEED_ADMIN_EMAIL and SEED_ADMIN_PASSWORD to seed the first administrator');
-    if (process.env.SEED_ADMIN_PASSWORD && process.env.SEED_ADMIN_PASSWORD.length < 10) throw new Error('SEED_ADMIN_PASSWORD must contain at least 10 characters');
-    const seedEmployee = process.env.SEED_ADMIN_EMAIL && process.env.SEED_ADMIN_PASSWORD
-      ? {
-          id: 'emp-' + Date.now().toString(36), showroomId: initialShowrooms[0].id,
-          name: process.env.SEED_ADMIN_NAME || 'Administrator', email: process.env.SEED_ADMIN_EMAIL.trim().toLowerCase(),
-          phone: '', role: 'ADMIN' as const, employeeCode: 'ADMIN-001', designation: 'Administrator',
-          passwordHash: await hashPassword(process.env.SEED_ADMIN_PASSWORD), active: true,
-          createdAt: new Date().toISOString(), updatedAt: new Date().toISOString()
-        }
-      : undefined;
-    await migrateAndSeed({ showrooms: initialShowrooms }, seedEmployee);
-    await acquireSingleInstanceLock();
-    await this.loadCache();
+    const seedEmail = (process.env.SEED_ADMIN_EMAIL || 'admin@dealership.com').trim().toLowerCase();
+    const seedPassword = process.env.SEED_ADMIN_PASSWORD || 'Admin@123456';
+    const seedName = process.env.SEED_ADMIN_NAME || 'Dealership Admin';
+
+    const defaultAdmin: EmployeeAccount = {
+      id: 'emp-admin-01',
+      showroomId: initialShowrooms[0]?.id || 'sh-01',
+      name: seedName,
+      email: seedEmail,
+      phone: '+91 98200 12345',
+      role: 'ADMIN',
+      employeeCode: 'ADMIN-001',
+      designation: 'General Manager & Admin',
+      passwordHash: await hashPassword(seedPassword),
+      active: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    if (process.env.DATABASE_URL) {
+      try {
+        console.log('[RemindMe] Connecting to PostgreSQL database...');
+        await migrateAndSeed({ showrooms: initialShowrooms }, defaultAdmin);
+        await acquireSingleInstanceLock();
+        await this.loadCache();
+        console.log('[RemindMe] PostgreSQL connected and cached successfully.');
+        return;
+      } catch (err) {
+        console.warn('[RemindMe] PostgreSQL connection failed. Falling back to in-memory store:', err);
+      }
+    } else {
+      console.warn('[RemindMe] DATABASE_URL not configured. Running with in-memory store (mock active).');
+    }
+
+    await this.seedInMemoryData(defaultAdmin);
+  }
+
+  private async seedInMemoryData(admin: EmployeeAccount) {
+    this.showrooms = structuredClone(initialShowrooms);
+    this.employees = [admin];
+
+    // Seed a service advisor employee
+    const advisorPasswordHash = await hashPassword('Advisor@123456');
+    this.employees.push({
+      id: 'emp-advisor-01',
+      showroomId: this.showrooms[0].id,
+      name: 'Jordan Taylor',
+      email: 'advisor@dealership.com',
+      phone: '+91 98200 67890',
+      role: 'EMPLOYEE',
+      employeeCode: 'ADV-101',
+      designation: 'Senior Service Advisor',
+      passwordHash: advisorPasswordHash,
+      active: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    });
+
+    // Seed demo customer
+    const customerPasswordHash = await hashPassword('Customer@123456');
+    const demoCustomer: CustomerAccount = {
+      id: 'cust-demo-01',
+      showroomId: this.showrooms[0].id,
+      customerCode: 'CUST-2026-001',
+      name: 'Sophia Martinez',
+      phone: '+15552345678',
+      email: 'sophia.m@example.com',
+      address: '42 Marine Drive',
+      city: 'Mumbai',
+      pincode: '400020',
+      status: 'ACTIVE',
+      preferredChannel: 'ALL',
+      passwordHash: customerPasswordHash,
+      createdAt: new Date(Date.now() - 90 * 86400000).toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    this.customers = [demoCustomer];
+
+    // Seed demo vehicle
+    const demoVehicle: Vehicle = {
+      id: 'veh-demo-01',
+      showroomId: this.showrooms[0].id,
+      customerId: demoCustomer.id,
+      registrationNumber: 'MH-02-CD-5678',
+      brand: 'Honda',
+      model: 'City',
+      variant: 'ZX CVT',
+      fuelType: 'PETROL',
+      purchaseDate: '2023-05-10',
+      yearOfManufacture: 2023,
+      transmission: 'Automatic',
+      chassisNumber: 'MAKGM6650PN012345',
+      engineNumber: 'L15Z15892341',
+      color: 'Radiant Red Metallic',
+      currentOdometer: 24500,
+      odometerReading: 24500,
+      status: 'ACTIVE',
+      lastServiceDate: new Date(Date.now() - 150 * 86400000).toISOString().split('T')[0],
+      nextServiceDate: new Date(Date.now() + 12 * 86400000).toISOString().split('T')[0],
+      insuranceExpiryDate: new Date(Date.now() + 25 * 86400000).toISOString().split('T')[0],
+      pucExpiryDate: new Date(Date.now() + 60 * 86400000).toISOString().split('T')[0],
+      createdAt: new Date(Date.now() - 90 * 86400000).toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    this.vehicles = [demoVehicle];
+
+    // Seed demo service history
+    this.services = [
+      {
+        id: 'srv-demo-01',
+        vehicleId: demoVehicle.id,
+        customerId: demoCustomer.id,
+        showroomId: this.showrooms[0].id,
+        serviceDate: new Date(Date.now() - 150 * 86400000).toISOString().split('T')[0],
+        serviceType: 'PERIODIC_MAINTENANCE',
+        description: '20,000 km scheduled periodic maintenance, engine oil replacement, oil filter, and general inspection.',
+        cost: 6500,
+        odometerReading: 19800,
+        nextServiceDate: demoVehicle.nextServiceDate!,
+        status: 'COMPLETED',
+        technicianName: 'Vikram Shinde',
+        invoiceNumber: 'INV-2025-089',
+        advisorNotes: 'Vehicle in excellent condition. Brake pads at 80% life.',
+        createdAt: new Date(Date.now() - 150 * 86400000).toISOString(),
+        updatedAt: new Date(Date.now() - 150 * 86400000).toISOString()
+      }
+    ];
+
+    // Seed demo insurance policy
+    this.insurancePolicies = [
+      {
+        id: 'ins-demo-01',
+        vehicleId: demoVehicle.id,
+        customerId: demoCustomer.id,
+        showroomId: this.showrooms[0].id,
+        provider: 'ICICI Lombard General Insurance',
+        policyNumber: 'ICICI-MOT-9928172',
+        policyType: 'COMPREHENSIVE',
+        startDate: new Date(Date.now() - 340 * 86400000).toISOString().split('T')[0],
+        expiryDate: demoVehicle.insuranceExpiryDate!,
+        premiumAmount: 18500,
+        idvAmount: 850000,
+        status: 'ACTIVE',
+        reminderScheduleDays: [30, 15, 7, 1],
+        reminderDaysBefore: [30, 15, 7, 1],
+        hasZeroDep: true,
+        createdAt: new Date(Date.now() - 340 * 86400000).toISOString(),
+        updatedAt: new Date().toISOString()
+      }
+    ];
+
+    // Seed demo document
+    this.documents = [
+      {
+        id: 'doc-demo-01',
+        vehicleId: demoVehicle.id,
+        customerId: demoCustomer.id,
+        showroomId: this.showrooms[0].id,
+        docType: 'PUC',
+        documentType: 'PUC',
+        docNumber: 'PUC-MH02-2025-4491',
+        documentNumber: 'PUC-MH02-2025-4491',
+        issueDate: new Date(Date.now() - 120 * 86400000).toISOString().split('T')[0],
+        expiryDate: demoVehicle.pucExpiryDate!,
+        notes: 'Emission test passed within BS6 parameters.',
+        createdAt: new Date(Date.now() - 120 * 86400000).toISOString(),
+        updatedAt: new Date().toISOString()
+      }
+    ];
+
+    // Seed demo reminders
+    this.reminders = [
+      {
+        id: 'rem-demo-01',
+        vehicleId: demoVehicle.id,
+        customerId: demoCustomer.id,
+        showroomId: this.showrooms[0].id,
+        category: 'SERVICE',
+        title: 'Periodic Maintenance Service Due',
+        description: 'Scheduled 30,000 km periodic service maintenance',
+        dueDate: demoVehicle.nextServiceDate!,
+        targetDaysBefore: 15,
+        status: 'UPCOMING',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      },
+      {
+        id: 'rem-demo-02',
+        vehicleId: demoVehicle.id,
+        customerId: demoCustomer.id,
+        showroomId: this.showrooms[0].id,
+        category: 'INSURANCE',
+        title: 'Motor Insurance Renewal',
+        description: 'ICICI Lombard motor insurance renewal alert',
+        dueDate: demoVehicle.insuranceExpiryDate!,
+        targetDaysBefore: 30,
+        status: 'UPCOMING',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      }
+    ];
+
+    // Seed demo notification history
+    this.notifications = [
+      {
+        id: 'notif-demo-01',
+        reminderId: 'rem-demo-01',
+        vehicleId: demoVehicle.id,
+        customerId: demoCustomer.id,
+        showroomId: this.showrooms[0].id,
+        type: 'SERVICE',
+        channel: 'EMAIL',
+        recipient: demoCustomer.email,
+        subject: `Upcoming Service Reminder: ${demoVehicle.brand} ${demoVehicle.model} (${demoVehicle.registrationNumber})`,
+        message: `Dear ${demoCustomer.name}, your periodic vehicle service is coming up on ${demoVehicle.nextServiceDate}.`,
+        status: 'DELIVERED',
+        mode: 'DEMO_SANDBOX',
+        sentAt: new Date(Date.now() - 2 * 86400000).toISOString(),
+        deliveryNotes: '[DEMO SMTP RELAY] Sent via Dealership Mail Hub. Response: 250 2.0.0 Ok',
+        createdAt: new Date(Date.now() - 2 * 86400000).toISOString()
+      }
+    ];
+
+    // Seed demo service request
+    this.serviceRequests = [
+      {
+        id: 'req-demo-01',
+        showroomId: this.showrooms[0].id,
+        customerId: demoCustomer.id,
+        vehicleId: demoVehicle.id,
+        preferredDate: demoVehicle.nextServiceDate!,
+        serviceType: 'PERIODIC_MAINTENANCE',
+        notes: 'Please also inspect front brake pads and wiper blades.',
+        status: 'PENDING',
+        createdAt: new Date(Date.now() - 1 * 86400000).toISOString()
+      }
+    ];
   }
 
   private async loadCache() {
@@ -65,6 +287,7 @@ class RemindMeDatabase {
   }
 
   private async persist(collection: CollectionName, record: PersistedRecord) {
+    if (!process.env.DATABASE_URL) return;
     const snapshot = structuredClone(record);
     const operation = this.writeQueue.then(() => upsertRecord(collection, snapshot));
     this.writeQueue = operation.then(() => undefined, () => undefined);

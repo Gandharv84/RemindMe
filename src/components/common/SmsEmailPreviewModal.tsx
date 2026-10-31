@@ -22,14 +22,14 @@ export const SmsEmailPreviewModal: React.FC = () => {
           className="bg-white rounded-2xl w-full max-w-xl shadow-2xl overflow-hidden text-slate-900 flex flex-col border border-slate-200"
         >
           {/* Header */}
-          <div className="p-4 bg-slate-900 text-white flex items-center justify-between">
+          <div className="p-4 bg-[#262B33] text-white flex items-center justify-between border-b border-[#333944]">
             <div className="flex items-center gap-3">
               <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${
-                isEmail ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' :
+                isEmail ? 'bg-[#FFF3EC] text-[#D95D1E] border border-[#FCD4BE]' :
                 isSms ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
                 'bg-teal-500/20 text-teal-400 border border-teal-500/30'
               }`}>
-                {isEmail && <Mail className="w-4 h-4" />}
+                {isEmail && <Mail className="w-4 h-4 text-[#F07836]" />}
                 {isSms && <Smartphone className="w-4 h-4" />}
                 {isWhatsApp && <MessageSquare className="w-4 h-4" />}
               </div>
@@ -73,7 +73,7 @@ export const SmsEmailPreviewModal: React.FC = () => {
                 {/* Action buttons inside email */}
                 <div className="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
                   <span>Apex Autohub Dealership &bull; Pune Central</span>
-                  <span className="text-blue-600 font-semibold cursor-pointer hover:underline">One-Click Book Slot &rarr;</span>
+                  <span className="text-[#F07836] font-semibold cursor-pointer hover:underline">One-Click Book Slot &rarr;</span>
                 </div>
               </div>
             ) : (
@@ -86,11 +86,11 @@ export const SmsEmailPreviewModal: React.FC = () => {
                     <div className="text-[10px] text-slate-500">Today &bull; SMS Gateway</div>
                   </div>
 
-                  <div className="bg-blue-600 text-white p-3.5 rounded-2xl rounded-tl-sm text-xs leading-relaxed shadow-md">
+                  <div className="bg-[#262B33] text-white p-3.5 rounded-2xl rounded-tl-sm text-xs leading-relaxed shadow-md border border-[#3E4551]">
                     {previewMessage.message}
-                    <div className="mt-2 text-[10px] text-blue-200 flex items-center justify-end gap-1">
+                    <div className="mt-2 text-[10px] text-slate-400 flex items-center justify-end gap-1">
                       <span>Delivered</span>
-                      <CheckCheck className="w-3 h-3 text-blue-200" />
+                      <CheckCheck className="w-3 h-3 text-[#F07836]" />
                     </div>
                   </div>
 

@@ -81,7 +81,7 @@ export const NotificationHistoryView: React.FC = () => {
             placeholder="Search by customer name, mobile number, email, vehicle registration, or subject..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
+            className="w-full pl-10 pr-4 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#F07836] focus:border-[#F07836] focus:bg-white transition-all"
           />
         </div>
 
@@ -90,7 +90,7 @@ export const NotificationHistoryView: React.FC = () => {
           <select
             value={channelFilter}
             onChange={e => setChannelFilter(e.target.value)}
-            className="text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-[#F07836] focus:border-[#F07836]"
           >
             <option value="ALL">All Channels</option>
             <option value="SMS">SMS Only (DLT Telecom)</option>
@@ -137,7 +137,7 @@ export const NotificationHistoryView: React.FC = () => {
                       <td className="py-3.5 px-4">
                         <div className="flex items-center gap-2.5">
                           <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
-                            isEmail ? 'bg-blue-100 text-blue-700' :
+                            isEmail ? 'bg-[#FFF3EC] text-[#D95D1E] border border-[#FCD4BE]' :
                             isSms ? 'bg-emerald-100 text-emerald-700' :
                             'bg-teal-100 text-teal-700'
                           }`}>
@@ -145,7 +145,7 @@ export const NotificationHistoryView: React.FC = () => {
                           </div>
                           <div>
                             <span className={`text-[10px] font-bold px-1.5 py-0.2 rounded font-mono ${
-                              isEmail ? 'bg-blue-50 text-blue-700' : 'bg-emerald-50 text-emerald-700'
+                              isEmail ? 'bg-[#FFF3EC] text-[#D95D1E] border border-[#FCD4BE]' : 'bg-emerald-50 text-emerald-700'
                             }`}>
                               {n.channel}
                             </span>

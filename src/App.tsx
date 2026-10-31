@@ -31,7 +31,7 @@ const MainLayout: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-100 flex flex-col font-sans antialiased text-slate-900 selection:bg-blue-500 selection:text-white">
+    <div className="min-h-screen bg-[#F7F7F8] flex flex-col font-sans antialiased text-slate-900 selection:bg-[#F07836] selection:text-white">
       {/* Main Navbar */}
       <Navbar
         onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}

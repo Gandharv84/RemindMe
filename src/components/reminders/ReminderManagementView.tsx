@@ -167,7 +167,7 @@ export const ReminderManagementView: React.FC = () => {
         <div className="flex items-center gap-2.5 flex-wrap">
           <button
             onClick={() => setIsModalOpen(true)}
-            className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold flex items-center gap-2 shadow-md shadow-blue-600/20 transition-all"
+            className="px-4 py-2.5 rounded-xl bg-[#F07836] hover:bg-[#E06725] text-white text-xs font-bold flex items-center gap-2 shadow-md shadow-[#F07836]/25 transition-all"
           >
             <Plus className="w-4 h-4" />
             <span>Create Manual Reminder</span>
@@ -191,7 +191,7 @@ export const ReminderManagementView: React.FC = () => {
               onClick={() => setActiveStatusTab(tab.id)}
               className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 ${
                 activeStatusTab === tab.id
-                  ? tab.alert ? 'bg-rose-600 text-white shadow-xs' : 'bg-slate-900 text-white shadow-xs'
+                  ? tab.alert ? 'bg-rose-600 text-white shadow-xs' : 'bg-[#262B33] text-white shadow-xs'
                   : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
               }`}
             >
@@ -216,7 +216,7 @@ export const ReminderManagementView: React.FC = () => {
               placeholder="Search by reminder title, vehicle registration, customer name, or phone..."
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
+              className="w-full pl-10 pr-4 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#F07836] focus:border-[#F07836] focus:bg-white transition-all"
             />
           </div>
 
@@ -225,7 +225,7 @@ export const ReminderManagementView: React.FC = () => {
             <select
               value={categoryFilter}
               onChange={e => setCategoryFilter(e.target.value)}
-              className="text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-[#F07836] focus:border-[#F07836]"
             >
               <option value="ALL">All Categories</option>
               <option value="SERVICE">Periodic Servicing</option>
@@ -266,11 +266,11 @@ export const ReminderManagementView: React.FC = () => {
                 <div className="flex items-start gap-3.5 flex-1 min-w-0">
                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 mt-0.5 ${
                     isOverdue ? 'bg-rose-100 text-rose-700' :
-                    r.category === 'SERVICE' ? 'bg-blue-100 text-blue-700' :
+                    r.category === 'SERVICE' ? 'bg-[#FFF3EC] text-[#D95D1E] border border-[#FCD4BE]' :
                     r.category === 'INSURANCE' ? 'bg-purple-100 text-purple-700' :
                     'bg-teal-100 text-teal-700'
                   }`}>
-                    {r.category === 'SERVICE' && <Wrench className="w-5 h-5" />}
+                    {r.category === 'SERVICE' && <Wrench className="w-5 h-5 text-[#F07836]" />}
                     {r.category === 'INSURANCE' && <ShieldAlert className="w-5 h-5" />}
                     {r.category === 'PUC' && <FileText className="w-5 h-5" />}
                     {r.category === 'GENERAL' && <BellRing className="w-5 h-5" />}
@@ -304,14 +304,14 @@ export const ReminderManagementView: React.FC = () => {
 
                     {/* Metadata strip */}
                     <div className="mt-2.5 flex items-center gap-3 text-[11px] text-slate-500 flex-wrap">
-                      <span className="bg-slate-900 text-white font-mono font-bold px-2 py-0.5 rounded text-[10px]">
+                      <span className="bg-[#262B33] text-white font-mono font-bold px-2 py-0.5 rounded text-[10px]">
                         {r.vehicleReg}
                       </span>
                       <span className="font-semibold text-slate-700">{r.customerName}</span>
                       <span className="font-mono text-slate-600">{r.customerPhone}</span>
                       <span className="text-slate-400">&bull;</span>
                       <span className="font-semibold text-slate-800">Due Date: {r.dueDate}</span>
-                      <span className="text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded font-mono text-[10px]">
+                      <span className="text-[#D95D1E] bg-[#FFF3EC] border border-[#FCD4BE] px-1.5 py-0.5 rounded font-mono text-[10px]">
                         {r.channel}
                       </span>
                     </div>
@@ -323,7 +323,7 @@ export const ReminderManagementView: React.FC = () => {
                   {/* Dispatch Notification */}
                   <button
                     onClick={() => handleDispatchNotification(r)}
-                    className="px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm shadow-blue-600/20 transition-all"
+                    className="px-3 py-2 rounded-xl bg-[#F07836] hover:bg-[#E06725] text-white text-xs font-bold flex items-center gap-1.5 shadow-sm shadow-[#F07836]/25 transition-all"
                     title="Send instant SMS/Email notification alert"
                   >
                     <Send className="w-3.5 h-3.5" />
@@ -353,9 +353,9 @@ export const ReminderManagementView: React.FC = () => {
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs">
           <div className="bg-white rounded-2xl w-full max-w-xl shadow-2xl border border-slate-200 overflow-hidden text-slate-900 max-h-[90vh] flex flex-col">
-            <div className="p-5 bg-slate-900 text-white flex items-center justify-between">
+            <div className="p-5 bg-[#262B33] text-white flex items-center justify-between border-b border-[#333944]">
               <div className="flex items-center gap-2.5">
-                <BellRing className="w-5 h-5 text-blue-400" />
+                <BellRing className="w-5 h-5 text-[#F07836]" />
                 <h3 className="font-bold text-sm">Schedule Manual Reminder</h3>
               </div>
               <button
@@ -376,7 +376,7 @@ export const ReminderManagementView: React.FC = () => {
                     required
                     value={formData.vehicleId}
                     onChange={e => setFormData({ ...formData, vehicleId: e.target.value })}
-                    className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white font-medium"
+                    className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#F07836] focus:border-[#F07836] focus:outline-none bg-white font-medium"
                   >
                     {vehicles.map(v => (
                       <option key={v.id} value={v.id}>
@@ -391,7 +391,7 @@ export const ReminderManagementView: React.FC = () => {
                   <select
                     value={formData.category}
                     onChange={e => setFormData({ ...formData, category: e.target.value as any })}
-                    className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white"
+                    className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#F07836] focus:border-[#F07836] focus:outline-none bg-white"
                   >
                     <option value="SERVICE">Periodic Maintenance Service</option>
                     <option value="INSURANCE">Insurance Policy Expiry</option>
@@ -405,7 +405,7 @@ export const ReminderManagementView: React.FC = () => {
                   <select
                     value={formData.priority}
                     onChange={e => setFormData({ ...formData, priority: e.target.value as any })}
-                    className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white"
+                    className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#F07836] focus:border-[#F07836] focus:outline-none bg-white"
                   >
                     <option value="URGENT">Urgent / Critical</option>
                     <option value="HIGH">High Priority</option>
@@ -423,7 +423,7 @@ export const ReminderManagementView: React.FC = () => {
                     required
                     value={formData.title}
                     onChange={e => setFormData({ ...formData, title: e.target.value })}
-                    className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#F07836] focus:border-[#F07836] focus:outline-none"
                   />
                 </div>
 
@@ -433,7 +433,7 @@ export const ReminderManagementView: React.FC = () => {
                     rows={2}
                     value={formData.description}
                     onChange={e => setFormData({ ...formData, description: e.target.value })}
-                    className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none resize-none"
+                    className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#F07836] focus:border-[#F07836] focus:outline-none resize-none"
                   />
                 </div>
 
@@ -444,7 +444,7 @@ export const ReminderManagementView: React.FC = () => {
                     required
                     value={formData.dueDate}
                     onChange={e => setFormData({ ...formData, dueDate: e.target.value })}
-                    className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none font-mono"
+                    className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#F07836] focus:border-[#F07836] focus:outline-none font-mono"
                   />
                 </div>
 
@@ -453,7 +453,7 @@ export const ReminderManagementView: React.FC = () => {
                   <select
                     value={formData.channel}
                     onChange={e => setFormData({ ...formData, channel: e.target.value as any })}
-                    className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white"
+                    className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#F07836] focus:border-[#F07836] focus:outline-none bg-white"
                   >
                     <option value="ALL">All (Email & SMS)</option>
                     <option value="SMS">SMS Only</option>
@@ -472,7 +472,7 @@ export const ReminderManagementView: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold shadow-md shadow-blue-600/20"
+                  className="px-5 py-2 rounded-xl bg-[#F07836] hover:bg-[#E06725] text-white font-bold shadow-md shadow-[#F07836]/25"
                 >
                   Schedule Reminder
                 </button>

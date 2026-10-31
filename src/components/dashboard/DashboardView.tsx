@@ -85,8 +85,8 @@ export const DashboardView: React.FC = () => {
 
   // Fuel data for Chart
   const fuelStats = [
-    { name: 'Petrol', count: vehiclesList.filter(v => v.fuelType === 'PETROL').length, color: '#3b82f6' },
-    { name: 'Diesel', count: vehiclesList.filter(v => v.fuelType === 'DIESEL').length, color: '#6366f1' },
+    { name: 'Petrol', count: vehiclesList.filter(v => v.fuelType === 'PETROL').length, color: '#F07836' },
+    { name: 'Diesel', count: vehiclesList.filter(v => v.fuelType === 'DIESEL').length, color: '#262B33' },
     { name: 'Electric', count: vehiclesList.filter(v => v.fuelType === 'ELECTRIC').length, color: '#10b981' },
     { name: 'Hybrid', count: vehiclesList.filter(v => v.fuelType === 'HYBRID').length, color: '#f59e0b' },
     { name: 'CNG', count: vehiclesList.filter(v => v.fuelType === 'CNG').length, color: '#8b5cf6' }
@@ -132,11 +132,11 @@ export const DashboardView: React.FC = () => {
   return (
     <div className="space-y-6 pb-12">
       {/* Top Banner with Greetings & Quick Actions */}
-      <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-indigo-950 rounded-2xl p-6 text-white shadow-xl relative overflow-hidden border border-slate-700/50">
+      <div className="bg-gradient-to-r from-[#262B33] via-[#1E2229] to-[#262B33] rounded-2xl p-6 text-white shadow-xl relative overflow-hidden border border-[#3E4551]">
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2 text-xs font-semibold text-blue-400 uppercase tracking-wider mb-1">
-              <Sparkles className="w-4 h-4 text-amber-400" />
+            <div className="flex items-center gap-2 text-xs font-semibold text-[#F07836] uppercase tracking-wider mb-1">
+              <Sparkles className="w-4 h-4 text-[#F07836]" />
               <span>Dealership Operations Center</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-extrabold font-outfit tracking-tight">
@@ -150,7 +150,7 @@ export const DashboardView: React.FC = () => {
           <div className="flex flex-wrap items-center gap-2.5">
             <button
               onClick={() => setActiveTab('customers')}
-              className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold flex items-center gap-2 shadow-lg shadow-blue-600/30 transition-all"
+              className="px-4 py-2.5 rounded-xl bg-[#F07836] hover:bg-[#E06725] text-white text-xs font-bold flex items-center gap-2 shadow-lg shadow-[#F07836]/25 transition-all cursor-pointer"
             >
               <Plus className="w-4 h-4" />
               <span>Add Customer</span>
@@ -158,9 +158,9 @@ export const DashboardView: React.FC = () => {
 
             <button
               onClick={() => setActiveTab('vehicles')}
-              className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white text-xs font-semibold flex items-center gap-2 transition-colors"
+              className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white text-xs font-semibold flex items-center gap-2 transition-colors cursor-pointer"
             >
-              <Car className="w-4 h-4 text-blue-400" />
+              <Car className="w-4 h-4 text-[#F07836]" />
               <span>Register Vehicle</span>
             </button>
           </div>
@@ -176,7 +176,7 @@ export const DashboardView: React.FC = () => {
         >
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-500">Total Customers</span>
-            <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center group-hover:scale-105 transition-transform">
+            <div className="w-9 h-9 rounded-xl bg-[#FFF3EC] text-[#F07836] flex items-center justify-center group-hover:scale-105 transition-transform">
               <Users className="w-4 h-4" />
             </div>
           </div>
@@ -193,13 +193,13 @@ export const DashboardView: React.FC = () => {
         >
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-500">Registered Vehicles</span>
-            <div className="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:scale-105 transition-transform">
+            <div className="w-9 h-9 rounded-xl bg-slate-100 text-[#262B33] flex items-center justify-center group-hover:scale-105 transition-transform">
               <Car className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-3 flex items-baseline justify-between">
             <span className="text-2xl font-extrabold text-slate-900">{stats?.totalVehicles ?? 0}</span>
-            <span className="text-[11px] font-medium text-indigo-600">Tracked</span>
+            <span className="text-[11px] font-medium text-[#262B33]">Tracked</span>
           </div>
         </div>
 
@@ -312,7 +312,7 @@ export const DashboardView: React.FC = () => {
               </div>
               <button
                 onClick={() => setActiveTab('reminders')}
-                className="text-xs font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                className="text-xs font-semibold text-[#F07836] hover:text-[#E06725] flex items-center gap-1 cursor-pointer"
               >
                 <span>View All ({stats?.upcomingRemindersCount ?? 0})</span>
                 <ArrowUpRight className="w-3.5 h-3.5" />
@@ -331,7 +331,7 @@ export const DashboardView: React.FC = () => {
                   </p>
                   <button
                     onClick={() => setActiveTab('vehicles')}
-                    className="mt-2 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold transition-colors"
+                    className="mt-2 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold transition-colors cursor-pointer"
                   >
                     + Register First Vehicle
                   </button>
@@ -349,7 +349,7 @@ export const DashboardView: React.FC = () => {
                           isOverdue ? 'bg-rose-100 text-rose-700' :
                           isService ? 'bg-amber-100 text-amber-700' :
                           isInsurance ? 'bg-purple-100 text-purple-700' :
-                          'bg-blue-100 text-blue-700'
+                          'bg-[#FFF3EC] text-[#D95D1E]'
                         }`}>
                           {isService && <Wrench className="w-4 h-4" />}
                           {isInsurance && <ShieldAlert className="w-4 h-4" />}
@@ -374,7 +374,7 @@ export const DashboardView: React.FC = () => {
                       <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
                         <button
                           onClick={() => handleQuickResend(rem.id)}
-                          className="px-2.5 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-semibold flex items-center gap-1.5 transition-colors"
+                          className="px-2.5 py-1.5 rounded-lg bg-[#FFF3EC] hover:bg-[#FFE6D8] text-[#D95D1E] text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
                           title="Send instant notification"
                         >
                           <Send className="w-3 h-3" />
@@ -383,7 +383,7 @@ export const DashboardView: React.FC = () => {
 
                         <button
                           onClick={() => setActiveTab('services')}
-                          className="px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition-colors"
+                          className="px-2.5 py-1.5 rounded-lg bg-[#262B33] hover:bg-[#1E2229] text-white text-xs font-semibold transition-colors cursor-pointer"
                         >
                           Mark Done
                         </button>
@@ -413,11 +413,11 @@ export const DashboardView: React.FC = () => {
                   <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
                   <Tooltip
-                    contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px', color: '#fff', fontSize: '12px' }}
+                    contentStyle={{ backgroundColor: '#262B33', borderColor: '#3E4551', borderRadius: '12px', color: '#fff', fontSize: '12px' }}
                     itemStyle={{ color: '#fff' }}
                   />
-                  <Bar dataKey="services" name="Periodic Services" fill="#3b82f6" radius={[6, 6, 0, 0]} />
-                  <Bar dataKey="renewals" name="Insurance Renewals" fill="#8b5cf6" radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="services" name="Periodic Services" fill="#F07836" radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="renewals" name="Insurance Renewals" fill="#262B33" radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -442,7 +442,7 @@ export const DashboardView: React.FC = () => {
                 </p>
                 <button
                   onClick={() => setActiveTab('vehicles')}
-                  className="mt-1 px-3 py-1.5 rounded-lg bg-blue-50 text-blue-700 font-semibold hover:bg-blue-100 transition-colors"
+                  className="mt-1 px-3 py-1.5 rounded-lg bg-[#FFF3EC] text-[#D95D1E] font-semibold hover:bg-[#FFE6D8] transition-colors cursor-pointer"
                 >
                   + Add Vehicle
                 </button>
@@ -467,7 +467,7 @@ export const DashboardView: React.FC = () => {
                         ))}
                       </Pie>
                       <Tooltip
-                        contentStyle={{ backgroundColor: '#0f172a', borderRadius: '8px', color: '#fff', fontSize: '12px' }}
+                        contentStyle={{ backgroundColor: '#262B33', borderColor: '#3E4551', borderRadius: '8px', color: '#fff', fontSize: '12px' }}
                       />
                     </PieChart>
                   </ResponsiveContainer>
@@ -492,7 +492,7 @@ export const DashboardView: React.FC = () => {
               <h3 className="text-sm font-bold text-slate-900">Recent Customer Alerts</h3>
               <button
                 onClick={() => setActiveTab('notifications')}
-                className="text-[11px] font-semibold text-blue-600 hover:underline"
+                className="text-[11px] font-semibold text-[#F07836] hover:text-[#E06725] hover:underline cursor-pointer"
               >
                 Full Log &rarr;
               </button>
@@ -518,7 +518,7 @@ export const DashboardView: React.FC = () => {
                       message: notif.message,
                       deliveryNotes: notif.deliveryNotes
                     })}
-                    className="p-3 rounded-xl border border-slate-100 bg-slate-50/60 hover:bg-blue-50/50 hover:border-blue-200 transition-all cursor-pointer group"
+                    className="p-3 rounded-xl border border-slate-100 bg-slate-50/60 hover:bg-[#FFF3EC]/50 hover:border-[#FCD4BE] transition-all cursor-pointer group"
                   >
                     <div className="flex items-center justify-between text-[11px] mb-1">
                       <span className="font-semibold text-slate-800 truncate max-w-[140px]">
@@ -528,12 +528,12 @@ export const DashboardView: React.FC = () => {
                         {new Date(notif.sentAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </span>
                     </div>
-                    <div className="text-xs text-slate-600 font-medium truncate group-hover:text-blue-700">
+                    <div className="text-xs text-slate-600 font-medium truncate group-hover:text-[#F07836]">
                       {notif.subject}
                     </div>
                     <div className="mt-2 flex items-center justify-between text-[10px]">
                       <span className={`px-1.5 py-0.5 rounded font-mono font-bold ${
-                        notif.channel === 'EMAIL' ? 'bg-blue-100 text-blue-800' : 'bg-emerald-100 text-emerald-800'
+                        notif.channel === 'EMAIL' ? 'bg-[#FFF3EC] text-[#D95D1E]' : 'bg-emerald-100 text-emerald-800'
                       }`}>
                         {notif.channel}
                       </span>

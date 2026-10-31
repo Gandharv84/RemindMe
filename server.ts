@@ -7,7 +7,7 @@ import { reminderEngine } from './server/services/reminderEngine';
 async function startServer() {
   await db.initialize();
   const app = await createApp();
-  const port = Number(process.env.PORT || 3000);
+  const port = 3000;
   const listener = app.listen(port, '0.0.0.0', () => {
     console.log(`[RemindMe Server] Listening on http://0.0.0.0:${port}`);
   });

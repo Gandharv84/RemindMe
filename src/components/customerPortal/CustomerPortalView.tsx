@@ -177,12 +177,12 @@ export const CustomerPortalView: React.FC = () => {
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-6 border-b border-slate-100">
               {/* Vehicle Title & Reg */}
               <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-md">
+                <div className="w-14 h-14 rounded-2xl bg-[#F07836] shadow-md shadow-[#F07836]/25 flex items-center justify-center text-white">
                   <Car className="w-7 h-7" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="bg-slate-900 text-white font-mono font-extrabold text-sm px-3 py-1 rounded-lg">
+                    <span className="bg-[#262B33] text-white font-mono font-extrabold text-sm px-3 py-1 rounded-lg">
                       {selectedVehicle.registrationNumber}
                     </span>
                     <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
@@ -212,7 +212,7 @@ export const CustomerPortalView: React.FC = () => {
                 <div className="h-8 w-px bg-slate-200"></div>
                 <div>
                   <span className="text-[11px] text-slate-400 block font-semibold">Service Dealership</span>
-                  <span className="text-xs font-bold text-blue-700">Authorized Service Center</span>
+                  <span className="text-xs font-bold text-[#D95D1E]">Authorized Service Center</span>
                 </div>
               </div>
             </div>
@@ -289,7 +289,7 @@ export const CustomerPortalView: React.FC = () => {
             {/* Service History Timeline */}
             <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
               <h3 className="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2">
-                <Wrench className="w-4 h-4 text-blue-600" />
+                <Wrench className="w-4 h-4 text-[#F07836]" />
                 <span>Service History & Work Invoices</span>
               </h3>
 
@@ -355,9 +355,9 @@ export const CustomerPortalView: React.FC = () => {
               </div>
 
               {/* Dealership Helpdesk Card */}
-              <div className="bg-slate-900 text-white rounded-2xl p-5 border border-slate-800">
+              <div className="bg-[#262B33] text-white rounded-2xl p-5 border border-[#3E4551]">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white">
+                  <div className="w-10 h-10 rounded-xl bg-[#F07836] flex items-center justify-center text-white">
                     <Building2 className="w-5 h-5" />
                   </div>
                   <div>
@@ -366,14 +366,14 @@ export const CustomerPortalView: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between text-xs">
+                <div className="mt-4 pt-3 border-t border-[#3E4551] flex items-center justify-between text-xs">
                   <span className="text-slate-300 font-mono flex items-center gap-1.5">
                     <Phone className="w-3.5 h-3.5 text-emerald-400" />
                     +91 20 2555 8899
                   </span>
                   <button
                     onClick={() => setIsBookingModalOpen(true)}
-                    className="text-blue-400 font-semibold hover:underline"
+                    className="text-[#F07836] font-semibold hover:underline"
                   >
                     Request Slot &rarr;
                   </button>
@@ -400,7 +400,7 @@ export const CustomerPortalView: React.FC = () => {
       {isBookingModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs">
           <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl border border-slate-200 overflow-hidden text-slate-900">
-            <div className="p-5 bg-slate-900 text-white flex items-center justify-between">
+            <div className="p-5 bg-[#262B33] text-white flex items-center justify-between border-b border-[#333944]">
               <div className="flex items-center gap-2.5">
                 <Calendar className="w-5 h-5 text-emerald-400" />
                 <h3 className="font-bold text-sm">Book Service Slot / Callback</h3>

@@ -21,7 +21,11 @@ function belongsToShowroom(req: Request, showroomId: string) {
   return req.auth?.role === 'ADMIN' || req.auth?.showroomId === showroomId;
 }
 
-// --- Auth Routes ---
+// --- Health & Auth Routes ---
+apiRouter.get('/health', (_req: Request, res: Response) => {
+  res.json({ status: 'ok', time: new Date().toISOString(), app: 'RemindMe Backend' });
+});
+
 apiRouter.post('/auth/login', async (req: Request, res: Response) => {
   const { identifier, password, role } = req.body || {};
   if (!isText(identifier, 254) || !isValidPassword(password) || !['EMPLOYEE', 'ADMIN', 'CUSTOMER'].includes(role)) {

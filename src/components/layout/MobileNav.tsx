@@ -27,7 +27,7 @@ export const MobileNav: React.FC = () => {
             key={item.id}
             onClick={() => setActiveTab(item.id)}
             className={`relative flex flex-col items-center justify-center py-1 px-3 rounded-xl text-[10px] font-semibold transition-colors ${
-              isActive ? 'text-blue-600' : 'text-slate-500 hover:text-slate-900'
+              isActive ? 'text-[#F07836]' : 'text-slate-500 hover:text-slate-900'
             }`}
           >
             <div className="relative">

@@ -15,15 +15,15 @@ import {
 export const initialShowrooms: Showroom[] = [
   {
     id: 'sh-01',
-    name: 'Showroom',
-    code: 'SH-01',
-    city: '',
-    state: '',
-    address: '',
-    phone: '',
-    email: '',
-    gstNumber: '',
-    managerName: '',
+    name: 'Sai Service Vehicle Agency',
+    code: 'SAI-01',
+    city: 'Mumbai',
+    state: 'Maharashtra',
+    address: 'Plot 42, Western Express Highway, Andheri East, Mumbai, MH 400069',
+    phone: '+91 22 2834 5000',
+    email: 'service@saiservice.example.com',
+    gstNumber: '27AAACS1234F1Z8',
+    managerName: 'Rajesh Kulkarni',
     createdAt: '2026-01-01T00:00:00Z',
     updatedAt: '2026-01-01T00:00:00Z'
   }

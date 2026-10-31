@@ -86,12 +86,12 @@ export const ServiceRequestsView: React.FC = () => {
               <div>
                 {/* Header */}
                 <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-                  <div className="bg-slate-900 text-white font-mono font-bold text-xs px-2.5 py-1 rounded-lg">
+                  <div className="bg-[#262B33] text-white font-mono font-bold text-xs px-2.5 py-1 rounded-lg">
                     {r.vehicleReg}
                   </div>
                   <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
                     r.status === 'PENDING' ? 'bg-amber-100 text-amber-800 animate-pulse' :
-                    r.status === 'CONFIRMED' ? 'bg-blue-100 text-blue-800' :
+                    r.status === 'CONFIRMED' ? 'bg-[#FFF3EC] text-[#D95D1E] border border-[#FCD4BE]' :
                     r.status === 'COMPLETED' ? 'bg-emerald-100 text-emerald-800' :
                     'bg-slate-100 text-slate-500'
                   }`}>
@@ -115,12 +115,12 @@ export const ServiceRequestsView: React.FC = () => {
 
                 {/* Request Details */}
                 <div className="mt-4 space-y-2 text-xs">
-                  <div className="flex items-center justify-between p-2 rounded-lg bg-blue-50/60 border border-blue-100 text-blue-950">
-                    <div className="flex items-center gap-1.5 font-medium">
-                      <Calendar className="w-3.5 h-3.5 text-blue-600" />
+                  <div className="flex items-center justify-between p-2 rounded-lg bg-[#FFF3EC]/80 border border-[#FCD4BE] text-slate-900">
+                    <div className="flex items-center gap-1.5 font-medium text-[#D95D1E]">
+                      <Calendar className="w-3.5 h-3.5 text-[#F07836]" />
                       <span>Preferred Slot:</span>
                     </div>
-                    <span className="font-bold font-mono">{r.preferredDate}</span>
+                    <span className="font-bold font-mono text-[#D95D1E]">{r.preferredDate}</span>
                   </div>
 
                   <div className="p-2 rounded-lg bg-slate-50 border border-slate-100 text-slate-700">
@@ -148,7 +148,7 @@ export const ServiceRequestsView: React.FC = () => {
                     </button>
                     <button
                       onClick={() => handleUpdateStatus(r.id, 'CONFIRMED')}
-                      className="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-xs transition-colors flex items-center gap-1"
+                      className="px-3.5 py-1.5 rounded-xl bg-[#F07836] hover:bg-[#E06725] text-white text-xs font-bold shadow-xs transition-colors flex items-center gap-1"
                     >
                       <CheckCircle2 className="w-3.5 h-3.5" />
                       <span>Confirm Slot</span>

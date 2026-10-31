@@ -39,7 +39,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, isSidebarOpen }
             onClick={() => setActiveTab(isCustomer ? 'customerPortal' : 'dashboard')}
             className="flex items-center gap-2.5 cursor-pointer select-none"
           >
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-blue-500/20">
+            <div className="w-9 h-9 rounded-xl bg-[#F07836] flex items-center justify-center text-white shadow-md shadow-[#F07836]/25">
               <Car className="w-5 h-5" />
             </div>
             <div>
@@ -63,7 +63,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, isSidebarOpen }
           >
             <Bell className="w-5 h-5" />
             {stats && stats.notificationsSent > 0 && (
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-blue-600 rounded-full ring-2 ring-white"></span>
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#F07836] rounded-full ring-2 ring-white"></span>
             )}
           </button>
 
@@ -73,7 +73,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, isSidebarOpen }
               onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
               className="flex items-center gap-2.5 p-1.5 sm:px-3 sm:py-1.5 rounded-xl hover:bg-slate-100 border border-slate-200 transition-colors text-left"
             >
-              <div className="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center font-bold text-xs">
+              <div className="w-8 h-8 rounded-lg bg-[#262B33] text-white flex items-center justify-center font-bold text-xs">
                 {employeeDisplayName.charAt(0).toUpperCase()}
               </div>
               <div className="hidden sm:block">

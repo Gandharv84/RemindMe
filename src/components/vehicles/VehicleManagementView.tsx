@@ -186,7 +186,7 @@ export const VehicleManagementView: React.FC = () => {
 
         <button
           onClick={handleOpenAdd}
-          className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold flex items-center gap-2 shadow-md shadow-blue-600/20 transition-all self-start sm:self-auto"
+          className="px-4 py-2.5 rounded-xl bg-[#F07836] hover:bg-[#E06725] text-white text-xs font-bold flex items-center gap-2 shadow-md shadow-[#F07836]/25 transition-all self-start sm:self-auto"
         >
           <Plus className="w-4 h-4" />
           <span>Register New Vehicle</span>
@@ -202,7 +202,7 @@ export const VehicleManagementView: React.FC = () => {
             placeholder="Search by registration (e.g. MH-12), model, brand, or customer name..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
+            className="w-full pl-10 pr-4 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#F07836] focus:border-[#F07836] focus:bg-white transition-all"
           />
         </div>
 
@@ -210,7 +210,7 @@ export const VehicleManagementView: React.FC = () => {
           <select
             value={filterType}
             onChange={e => setFilterType(e.target.value)}
-            className="text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-[#F07836] focus:border-[#F07836]"
           >
             <option value="ALL">All Vehicles</option>
             <option value="SERVICE_DUE">Service Due Soon / Overdue</option>
@@ -244,15 +244,15 @@ export const VehicleManagementView: React.FC = () => {
                 <div>
                   {/* Card Header: Reg Plate & Badges */}
                   <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-                    <div className="bg-slate-900 text-white font-mono font-bold text-xs px-2.5 py-1 rounded-lg tracking-wider border border-slate-800 shadow-xs flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                    <div className="bg-[#262B33] text-white font-mono font-bold text-xs px-2.5 py-1 rounded-lg tracking-wider border border-[#3E4551] shadow-xs flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#F07836]"></span>
                       <span>{v.registrationNumber}</span>
                     </div>
 
                     <div className="flex items-center gap-1.5">
                       <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                        v.fuelType === 'PETROL' ? 'bg-blue-50 text-blue-700 border border-blue-200' :
-                        v.fuelType === 'DIESEL' ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' :
+                        v.fuelType === 'PETROL' ? 'bg-[#FFF3EC] text-[#D95D1E] border border-[#FCD4BE]' :
+                        v.fuelType === 'DIESEL' ? 'bg-slate-100 text-[#262B33] border border-slate-300' :
                         v.fuelType === 'ELECTRIC' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
                         'bg-amber-50 text-amber-700 border border-amber-200'
                       }`}>
@@ -379,9 +379,9 @@ export const VehicleManagementView: React.FC = () => {
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs">
           <div className="bg-white rounded-2xl w-full max-w-2xl shadow-2xl border border-slate-200 overflow-hidden text-slate-900 max-h-[90vh] flex flex-col">
-            <div className="p-5 bg-slate-900 text-white flex items-center justify-between">
+            <div className="p-5 bg-[#262B33] text-white flex items-center justify-between border-b border-[#333944]">
               <div className="flex items-center gap-2.5">
-                <Car className="w-5 h-5 text-blue-400" />
+                <Car className="w-5 h-5 text-[#F07836]" />
                 <h3 className="font-bold text-sm">
                   {editingVehicle ? 'Edit Vehicle Details' : 'Register Vehicle to Showroom'}
                 </h3>
@@ -404,7 +404,7 @@ export const VehicleManagementView: React.FC = () => {
                     required
                     value={formData.customerId}
                     onChange={e => setFormData({ ...formData, customerId: e.target.value })}
-                    className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white font-medium"
+                    className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#F07836] focus:border-[#F07836] focus:outline-none bg-white font-medium"
                   >
                     <option value="">-- Choose Registered Customer --</option>
                     {customers.map(c => (
@@ -425,7 +425,7 @@ export const VehicleManagementView: React.FC = () => {
                     placeholder="e.g. MH-12-AB-1234"
                     value={formData.registrationNumber}
                     onChange={e => setFormData({ ...formData, registrationNumber: e.target.value.toUpperCase() })}
-                    className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none font-mono uppercase"
+                    className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#F07836] focus:border-[#F07836] focus:outline-none font-mono uppercase"
                   />
                 </div>
 
@@ -436,7 +436,7 @@ export const VehicleManagementView: React.FC = () => {
                     required
                     value={formData.brand}
                     onChange={e => setFormData({ ...formData, brand: e.target.value })}
-                    className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#F07836] focus:border-[#F07836] focus:outline-none"
                   />
                 </div>
 
@@ -447,7 +447,7 @@ export const VehicleManagementView: React.FC = () => {
                     required
                     value={formData.model}
                     onChange={e => setFormData({ ...formData, model: e.target.value })}
-                    className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#F07836] focus:border-[#F07836] focus:outline-none"
                   />
                 </div>
 
@@ -457,7 +457,7 @@ export const VehicleManagementView: React.FC = () => {
                     type="text"
                     value={formData.variant}
                     onChange={e => setFormData({ ...formData, variant: e.target.value })}
-                    className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#F07836] focus:border-[#F07836] focus:outline-none"
                   />
                 </div>
 
@@ -466,7 +466,7 @@ export const VehicleManagementView: React.FC = () => {
                   <select
                     value={formData.fuelType}
                     onChange={e => setFormData({ ...formData, fuelType: e.target.value as any })}
-                    className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white"
+                    className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#F07836] focus:border-[#F07836] focus:outline-none bg-white"
                   >
                     <option value="PETROL">Petrol</option>
                     <option value="DIESEL">Diesel</option>
@@ -481,7 +481,7 @@ export const VehicleManagementView: React.FC = () => {
                   <select
                     value={formData.transmission}
                     onChange={e => setFormData({ ...formData, transmission: e.target.value as any })}
-                    className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white"
+                    className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#F07836] focus:border-[#F07836] focus:outline-none bg-white"
                   >
                     <option value="MANUAL">Manual</option>
                     <option value="AUTOMATIC">Automatic (AT/CVT)</option>
@@ -496,7 +496,7 @@ export const VehicleManagementView: React.FC = () => {
                     type="number"
                     value={formData.yearOfManufacture}
                     onChange={e => setFormData({ ...formData, yearOfManufacture: Number(e.target.value) })}
-                    className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#F07836] focus:border-[#F07836] focus:outline-none"
                   />
                 </div>
 
@@ -506,12 +506,12 @@ export const VehicleManagementView: React.FC = () => {
                     type="number"
                     value={formData.odometerReading}
                     onChange={e => setFormData({ ...formData, odometerReading: Number(e.target.value) })}
-                    className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none font-mono"
+                    className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#F07836] focus:border-[#F07836] focus:outline-none font-mono"
                   />
                 </div>
 
                 <div className="sm:col-span-2 pt-2 border-t border-slate-200">
-                  <h4 className="font-bold text-slate-900 mb-2 text-xs uppercase tracking-wider text-blue-600">
+                  <h4 className="font-bold text-[#F07836] mb-2 text-xs uppercase tracking-wider">
                     Reminder Schedule Configuration
                   </h4>
                 </div>
@@ -522,7 +522,7 @@ export const VehicleManagementView: React.FC = () => {
                     type="date"
                     value={formData.nextServiceDate}
                     onChange={e => setFormData({ ...formData, nextServiceDate: e.target.value })}
-                    className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none font-mono"
+                    className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#F07836] focus:border-[#F07836] focus:outline-none font-mono"
                   />
                 </div>
 
@@ -532,7 +532,7 @@ export const VehicleManagementView: React.FC = () => {
                     type="date"
                     value={formData.insuranceExpiryDate}
                     onChange={e => setFormData({ ...formData, insuranceExpiryDate: e.target.value })}
-                    className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none font-mono"
+                    className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#F07836] focus:border-[#F07836] focus:outline-none font-mono"
                   />
                 </div>
 
@@ -542,7 +542,7 @@ export const VehicleManagementView: React.FC = () => {
                     type="date"
                     value={formData.pucExpiryDate}
                     onChange={e => setFormData({ ...formData, pucExpiryDate: e.target.value })}
-                    className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none font-mono"
+                    className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#F07836] focus:border-[#F07836] focus:outline-none font-mono"
                   />
                 </div>
               </div>
@@ -557,7 +557,7 @@ export const VehicleManagementView: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold shadow-md shadow-blue-600/20"
+                  className="px-5 py-2 rounded-xl bg-[#F07836] hover:bg-[#E06725] text-white font-bold shadow-md shadow-[#F07836]/25"
                 >
                   {editingVehicle ? 'Save Vehicle Updates' : 'Complete Vehicle Registration'}
                 </button>

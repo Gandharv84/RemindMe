@@ -34,11 +34,11 @@ export const LoginView: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center p-4">
+    <div className="min-h-screen bg-[#262B33] flex flex-col items-center justify-center p-4">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-8 border border-slate-200">
         {/* Header */}
         <div className="text-center mb-6">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white mx-auto shadow-lg shadow-blue-500/20 mb-4">
+          <div className="w-14 h-14 rounded-2xl bg-[#F07836] flex items-center justify-center text-white mx-auto shadow-lg shadow-[#F07836]/25 mb-4">
             <Car className="w-7 h-7" />
           </div>
           <h1 className="text-2xl font-extrabold text-slate-900 font-outfit tracking-tight">
@@ -105,7 +105,7 @@ export const LoginView: React.FC = () => {
                     value={identifier}
                     onChange={e => setIdentifier(e.target.value)}
                     placeholder="Work email or employee code"
-                    className="w-full pl-10 pr-4 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-slate-900 font-medium"
+                    className="w-full pl-10 pr-4 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#F07836] focus:border-[#F07836] focus:bg-white transition-all text-slate-900 font-medium"
                   />
                 </div>
               </div>
@@ -122,7 +122,7 @@ export const LoginView: React.FC = () => {
                     value={password}
                     onChange={e => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full pl-10 pr-4 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-slate-900 font-medium"
+                    className="w-full pl-10 pr-4 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#F07836] focus:border-[#F07836] focus:bg-white transition-all text-slate-900 font-medium"
                   />
                 </div>
               </div>
@@ -140,7 +140,7 @@ export const LoginView: React.FC = () => {
                   value={customerIdentifier}
                   onChange={e => setCustomerIdentifier(e.target.value)}
                   placeholder="e.g. 9876543210 or email@domain.com"
-                  className="w-full pl-10 pr-4 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-slate-900 font-medium"
+                  className="w-full pl-10 pr-4 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#F07836] focus:border-[#F07836] focus:bg-white transition-all text-slate-900 font-medium"
                 />
               </div>
               <p className="text-[11px] text-slate-400 mt-1.5">
@@ -149,7 +149,7 @@ export const LoginView: React.FC = () => {
               <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mt-4 mb-1.5">Password</label>
               <div className="relative">
                 <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                <input type="password" required minLength={10} value={password} onChange={e => setPassword(e.target.value)} placeholder="At least 10 characters" className="w-full pl-10 pr-4 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-slate-900 font-medium" />
+                <input type="password" required minLength={10} value={password} onChange={e => setPassword(e.target.value)} placeholder="At least 10 characters" className="w-full pl-10 pr-4 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#F07836] focus:border-[#F07836] focus:bg-white transition-all text-slate-900 font-medium" />
               </div>
             </div>
           )}
@@ -157,7 +157,7 @@ export const LoginView: React.FC = () => {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-lg shadow-blue-600/30 transition-all flex items-center justify-center gap-2 mt-2 disabled:opacity-60"
+            className="w-full py-3 px-4 rounded-xl bg-[#F07836] hover:bg-[#E06725] text-white text-xs font-bold shadow-lg shadow-[#F07836]/25 transition-all flex items-center justify-center gap-2 mt-2 disabled:opacity-60 cursor-pointer"
           >
             <span>
               {isLoading
@@ -169,6 +169,42 @@ export const LoginView: React.FC = () => {
             <ArrowRight className="w-4 h-4" />
           </button>
         </form>
+
+        {/* Demo Quick Access Helper */}
+        <div className="mt-6 pt-5 border-t border-slate-100">
+          <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2 text-center">
+            Demo Quick Access
+          </p>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setLoginMode('EMPLOYEE');
+                setIdentifier('admin@dealership.com');
+                setPassword('Admin@123456');
+                setError(null);
+              }}
+              className="px-2.5 py-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-[#FFF3EC] hover:border-[#F07836] text-[11px] font-medium text-slate-700 hover:text-[#F07836] transition-colors text-center cursor-pointer"
+            >
+              Fill Staff Admin
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setLoginMode('CUSTOMER');
+                setCustomerIdentifier('sophia.m@example.com');
+                setPassword('Customer@123456');
+                setError(null);
+              }}
+              className="px-2.5 py-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-[#FFF3EC] hover:border-[#F07836] text-[11px] font-medium text-slate-700 hover:text-[#F07836] transition-colors text-center cursor-pointer"
+            >
+              Fill Customer Portal
+            </button>
+          </div>
+          <p className="text-[10px] text-slate-400 text-center mt-2">
+            Default Admin: <code className="text-slate-600">admin@dealership.com / Admin@123456</code>
+          </p>
+        </div>
       </div>
 
       <div className="mt-8 text-center text-xs text-slate-500">
