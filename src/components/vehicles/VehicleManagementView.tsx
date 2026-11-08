@@ -115,7 +115,9 @@ export const VehicleManagementView: React.FC = () => {
       variant: v.variant,
       yearOfManufacture: v.yearOfManufacture,
       fuelType: v.fuelType,
-      transmission: v.transmission,
+      transmission: ['MANUAL', 'AUTOMATIC', 'DCT', 'IMT'].includes(v.transmission || '')
+        ? v.transmission as 'MANUAL' | 'AUTOMATIC' | 'DCT' | 'IMT'
+        : 'AUTOMATIC',
       color: v.color,
       odometerReading: v.odometerReading,
       lastServiceDate: v.lastServiceDate || '',

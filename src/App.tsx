@@ -5,7 +5,7 @@ import { Navbar } from './components/layout/Navbar';
 import { Sidebar } from './components/layout/Sidebar';
 import { MobileNav } from './components/layout/MobileNav';
 import { ToastContainer } from './components/common/Toast';
-import { SmsEmailPreviewModal } from './components/common/SmsEmailPreviewModal';
+import { EmailPreviewModal } from './components/common/EmailPreviewModal';
 import { LoginView } from './components/auth/LoginView';
 
 // Views
@@ -71,7 +71,7 @@ const MainLayout: React.FC = () => {
 
       {/* Global Overlays & Modals */}
       <ToastContainer />
-      <SmsEmailPreviewModal />
+      <EmailPreviewModal />
     </div>
   );
 };

@@ -80,7 +80,7 @@ export const CustomerPortalView: React.FC = () => {
         notes
       });
       confetti({ particleCount: 60, spread: 70, origin: { y: 0.6 } });
-      showToast('success', 'Service Slot Requested', 'Dealership service team notified. You will receive a confirmation SMS shortly.');
+      showToast('success', 'Service Slot Requested', 'Your request was submitted to the dealership. The team will follow up through the customer portal.');
       setIsBookingModalOpen(false);
       await loadCustomerPortal(user.id);
     } catch (err: any) {

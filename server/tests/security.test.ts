@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import bcrypt from 'bcryptjs';
 import { createSessionToken, hashPassword, safeCustomer, verifyPassword, verifySessionToken } from '../security';
 import { currentMonthRange, isDate, isRecord } from '../validation';
 
@@ -10,6 +11,12 @@ test('password hashes are salted and verification rejects wrong passwords', asyn
   assert.equal(await verifyPassword('long-customer-password', first), true);
   assert.equal(await verifyPassword('wrong-password', first), false);
   assert.equal(await verifyPassword('anything', 'admin123'), false);
+});
+
+test('legacy bcrypt password hashes remain verifiable after import', async () => {
+  const legacyHash = await bcrypt.hash('legacy-password', 4);
+  assert.equal(await verifyPassword('legacy-password', legacyHash), true);
+  assert.equal(await verifyPassword('wrong-password', legacyHash), false);
 });
 
 test('signed sessions enforce their signature and expiry', () => {

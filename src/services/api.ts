@@ -251,13 +251,32 @@ export const api = {
     return res.json();
   },
 
-  resendReminderNotification: async (id: string, channel: 'ALL' | 'EMAIL' | 'SMS' = 'ALL') => {
+  resendReminderNotification: async (id: string) => {
     const res = await apiFetch(`${API_BASE}/reminders/${id}/resend`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ channel })
+      body: JSON.stringify({ channel: 'EMAIL' })
     });
+    const body = await res.json();
+    if (!res.ok) throw new Error(body.error || 'Failed to send reminder email');
+    return body;
+  },
+
+  getNotificationStatus: async (): Promise<{ configured: boolean; missing: string[] }> => {
+    const res = await apiFetch(`${API_BASE}/notifications/status`);
+    if (!res.ok) throw new Error('Failed to load SMTP status');
     return res.json();
+  },
+
+  retryNotification: async (id: string) => {
+    const res = await apiFetch(`${API_BASE}/notifications/${id}/retry`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({})
+    });
+    const body = await res.json();
+    if (!res.ok) throw new Error(body.error || 'Failed to retry email');
+    return body.notification as Notification;
   },
 
   // Notifications
@@ -267,13 +286,15 @@ export const api = {
     return res.json();
   },
 
-  sendDirectNotification: async (data: { vehicleId?: string; customerId: string; showroomId?: string; channel: string; subject: string; message: string }) => {
+  sendDirectNotification: async (data: { vehicleId?: string; customerId: string; showroomId?: string; channel?: 'EMAIL'; subject: string; message: string }) => {
     const res = await apiFetch(`${API_BASE}/notifications/send-direct`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
     });
-    return res.json();
+    const body = await res.json();
+    if (!res.ok) throw new Error(body.error || 'Failed to send email');
+    return body.notification;
   },
 
   // Reminder Engine Trigger
@@ -305,12 +326,15 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
     });
-    return res.json();
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(body.error || 'Could not submit service request');
+    return body;
   },
 
   getServiceRequests: async (showroomId?: string) => {
     const url = showroomId ? `${API_BASE}/service-requests?showroomId=${showroomId}` : `${API_BASE}/service-requests`;
     const res = await apiFetch(url);
+    if (!res.ok) throw new Error(`Failed to load service requests (${res.status})`);
     return res.json();
   },
 
@@ -320,6 +344,7 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status })
     });
+    if (!res.ok) throw new Error(`Failed to update service request (${res.status})`);
     return res.json();
   }
 };

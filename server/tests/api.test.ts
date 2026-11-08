@@ -6,6 +6,8 @@ import { db } from '../db';
 import { createSessionToken, hashPassword } from '../security';
 import { reminderEngine } from '../services/reminderEngine';
 import { notificationService } from '../services/notificationService';
+import { loadCollection, setPrismaModelForTests } from '../prismaStore';
+import { api, setAuthToken } from '../../src/services/api';
 
 process.env.SESSION_SECRET = 'test-only-session-secret-0123456789';
 process.env.NODE_ENV = 'test';
@@ -17,7 +19,7 @@ let customerToken: string;
 
 const customer = (id: string, passwordHash: string) => ({
   id, showroomId: 'sh-1', customerCode: id.toUpperCase(), name: id, phone: `+91 90000000${id === 'c1' ? '01' : '02'}`,
-  email: `${id}@example.test`, address: '', city: '', pincode: '', status: 'ACTIVE' as const, preferredChannel: 'ALL' as const,
+  email: `${id}@example.test`, address: '', city: '', pincode: '', status: 'ACTIVE' as const, preferredChannel: 'EMAIL' as const,
   passwordHash, createdAt: '', updatedAt: ''
 });
 
@@ -89,6 +91,20 @@ test('protected routes require authentication and customers cannot access staff 
   assert.equal((await request('/api/customers', { token: employeeToken })).status, 200);
 });
 
+test('API-only app returns JSON for rejected async route handlers', async () => {
+  const originalRun = reminderEngine.run;
+  reminderEngine.run = async () => {
+    throw new Error('simulated engine failure');
+  };
+  try {
+    const response = await request('/api/engine/run', { method: 'POST', token: employeeToken, body: { referenceDate: '2026-11-07' } });
+    assert.equal(response.status, 500);
+    assert.deepEqual(await response.json(), { error: 'Internal server error' });
+  } finally {
+    reminderEngine.run = originalRun;
+  }
+});
+
 test('staff responses omit password hashes and cannot widen their showroom scope', async () => {
   const response = await request('/api/customers?showroomId=sh-2', { token: employeeToken });
   assert.equal(response.status, 200);
@@ -124,10 +140,100 @@ test('service requests reject client-supplied customer or showroom identities', 
   assert.equal(response.status, 400);
 });
 
+test('customer service request is committed through the PostgreSQL writer and visible to showroom staff', async () => {
+  const previousRequests = db.serviceRequests;
+  const previousDatabaseUrl = process.env.DATABASE_URL;
+  const persisted = new Map<string, { payload: any; showroomId: string; customerId: string; vehicleId: string }>();
+  const prismaCalls: Array<{ where: any; create: any; update: any }> = [];
+  const fakeServiceRequestModel = {
+    async upsert(args: { where: any; create: any; update: any }) {
+      prismaCalls.push(args);
+      persisted.set(args.where.id, args.create);
+      return args.create;
+    },
+    async findMany() {
+      return [...persisted.values()].map(row => ({ payload: row.payload }));
+    }
+  };
+  db.serviceRequests = [];
+  process.env.DATABASE_URL = 'postgres://postgres-test.invalid/remindme';
+  setPrismaModelForTests('serviceRequest', fakeServiceRequestModel);
+
+  try {
+    const preferredDate = new Date();
+    preferredDate.setDate(preferredDate.getDate() + 3);
+    const submission = await request('/api/customer-portal/request-service', { method: 'POST', token: customerToken, body: {
+      vehicleId: 'v1', preferredDate: preferredDate.toISOString().slice(0, 10), serviceType: 'PERIODIC_MAINTENANCE', notes: 'Please check the brakes.'
+    } });
+    assert.equal(submission.status, 201);
+    const submitted = await submission.json() as any;
+
+    assert.equal(prismaCalls.length, 1, 'service request must be written through the Prisma model');
+    const insert = prismaCalls[0].create;
+    assert.equal(insert.id, submitted.id);
+    assert.equal(insert.showroomId, 'sh-1');
+    assert.equal(insert.customerId, 'c1');
+    assert.equal(insert.vehicleId, 'v1');
+    const persistedPayload = insert.payload;
+    assert.equal(persistedPayload.status, 'PENDING');
+
+    // Simulate a process restart by discarding the cache and reloading from the
+    // Prisma model before staff/admin retrieves the request.
+    db.serviceRequests = [];
+    db.serviceRequests = await loadCollection<any>('serviceRequests');
+    assert.equal(db.serviceRequests[0].id, submitted.id);
+
+    const staffResponse = await request('/api/service-requests?showroomId=sh-1', { token: employeeToken });
+    assert.equal(staffResponse.status, 200);
+    const staffRequests = await staffResponse.json() as any[];
+    assert.equal(staffRequests.length, 1);
+    assert.equal(staffRequests[0].id, submitted.id);
+    assert.equal(staffRequests[0].customerName, 'c1');
+    assert.equal(staffRequests[0].vehicleReg, 'AA-01');
+
+    const adminResponse = await request('/api/service-requests?showroomId=sh-1', { token: adminToken });
+    assert.equal(adminResponse.status, 200);
+    assert.equal((await adminResponse.json() as any[])[0].id, submitted.id);
+  } finally {
+    db.serviceRequests = previousRequests;
+    if (previousDatabaseUrl === undefined) delete process.env.DATABASE_URL;
+    else process.env.DATABASE_URL = previousDatabaseUrl;
+    setPrismaModelForTests('serviceRequest');
+  }
+});
+
+test('customer service request API surfaces rejected submissions instead of treating them as success', async () => {
+  const originalFetch = globalThis.fetch;
+  setAuthToken(null);
+  globalThis.fetch = async () => new Response(JSON.stringify({ error: 'Service request was rejected' }), {
+    status: 400,
+    headers: { 'Content-Type': 'application/json' }
+  });
+  try {
+    await assert.rejects(api.requestService({ vehicleId: 'v1', preferredDate: '2026-11-05', serviceType: 'PERIODIC_MAINTENANCE' }), /Service request was rejected/);
+    await assert.rejects(api.getServiceRequests('sh-1'), /Failed to load service requests \(400\)/);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
 test('customer updates reject mass assignment', async () => {
   const response = await request('/api/customers/c1', { method: 'PUT', token: employeeToken, body: { showroomId: 'other', passwordHash: 'injected' } });
   assert.equal(response.status, 400);
   assert.equal(db.customers[0].passwordHash?.startsWith('scrypt$'), true);
+});
+
+test('notification APIs reject SMS and WhatsApp channels', async () => {
+  for (const channel of ['SMS', 'WHATSAPP']) {
+    const response = await request('/api/notifications/send-direct', { method: 'POST', token: employeeToken, body: {
+      customerId: 'c1', channel, subject: 'Test', message: 'This must not dispatch'
+    } });
+    assert.equal(response.status, 400);
+  }
+  const customerResponse = await request('/api/customers', { method: 'POST', token: employeeToken, body: {
+    name: 'Unsupported preference', phone: '+91 9999999999', email: 'unsupported@example.test', preferredChannel: 'SMS', password: 'customer-password-10'
+  } });
+  assert.equal(customerResponse.status, 400);
 });
 
 test('vehicle creation validates customer relationships before writing', async () => {
@@ -146,7 +252,7 @@ test('existing vehicle, service, insurance, and document form payloads reach the
   db.addService = async (data: any) => { captures.service = data; return { ...data, id: 'new-s' }; };
   db.addInsurance = async (data: any) => { captures.insurance = data; return { ...data, id: 'new-i' }; };
   db.addDocument = async (data: any) => { captures.document = data; return { ...data, id: 'new-d' }; };
-  reminderEngine.run = async () => ({ evaluatedVehicles: 0, newRemindersCreated: 0, existingRemindersUpdated: 0, notificationsDispatched: 0, logs: [], timestamp: '' });
+  reminderEngine.run = async () => ({ evaluatedVehicles: 0, newRemindersCreated: 0, existingRemindersUpdated: 0, notificationsDispatched: 0, notificationsFailed: 0, logs: [], timestamp: '' });
   try {
     const vehicle = await request('/api/vehicles', { method: 'POST', token: employeeToken, body: {
       showroomId: 'sh-1', customerId: 'c1', registrationNumber: 'CC-03', brand: 'C', model: 'Three', variant: 'Base', yearOfManufacture: 2026,
@@ -213,7 +319,7 @@ test('reminder engine is idempotent for a vehicle and due-date cycle', async () 
     db.reminders.unshift(item);
     return item;
   };
-  notificationService.send = async (payload: any) => { sent++; return { ...payload, id: `n-${sent}`, status: 'DELIVERED', mode: 'DEMO_SANDBOX', sentAt: '', createdAt: '' } as any; };
+  notificationService.send = async (payload: any) => { sent++; return { ...payload, id: `n-${sent}`, status: 'SENT', mode: 'LIVE', sentAt: '', createdAt: '' } as any; };
   try {
     await reminderEngine.run(new Date().toISOString().slice(0,10));
     const firstCount = db.reminders.length;
@@ -223,6 +329,37 @@ test('reminder engine is idempotent for a vehicle and due-date cycle', async () 
     assert.equal(sent, 1);
   } finally {
     db.addReminder = originalAddReminder;
+    notificationService.send = originalSend;
+  }
+});
+
+test('reminder engine uses email for service, insurance, and PUC expiry', async () => {
+  db.reminders = [];
+  const due = new Date();
+  due.setDate(due.getDate() + 2);
+  const dueDate = due.toISOString().slice(0, 10);
+  const vehicle = db.vehicles[0];
+  const originalDates = { nextServiceDate: vehicle.nextServiceDate, insuranceExpiryDate: vehicle.insuranceExpiryDate, pucExpiryDate: vehicle.pucExpiryDate };
+  vehicle.nextServiceDate = dueDate;
+  vehicle.insuranceExpiryDate = dueDate;
+  vehicle.pucExpiryDate = dueDate;
+  const originalSend = notificationService.send;
+  const sent: any[] = [];
+  notificationService.send = async (payload: any) => {
+    sent.push(payload);
+    return { ...payload, id: `n-${sent.length}`, status: 'SENT', mode: 'LIVE', sentAt: '', createdAt: '' } as any;
+  };
+  try {
+    const result = await reminderEngine.run(new Date().toISOString().slice(0, 10));
+    assert.deepEqual(sent.map(payload => payload.type).sort(), ['INSURANCE_RENEWAL', 'PUC_EXPIRY', 'SERVICE_REMINDER']);
+    assert.equal(sent.every(payload => payload.channel === 'EMAIL' && payload.recipient === 'c1@example.test'), true);
+    assert.equal(result.notificationsDispatched, 3);
+    assert.equal(result.notificationsFailed, 0);
+  } finally {
+    vehicle.nextServiceDate = originalDates.nextServiceDate;
+    vehicle.insuranceExpiryDate = originalDates.insuranceExpiryDate;
+    vehicle.pucExpiryDate = originalDates.pucExpiryDate;
+    db.reminders = [];
     notificationService.send = originalSend;
   }
 });

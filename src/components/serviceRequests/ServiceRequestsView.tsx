@@ -35,6 +35,7 @@ export const ServiceRequestsView: React.FC = () => {
       setRequests(data);
     } catch (err) {
       console.error('Failed to load service requests', err);
+      showToast('error', 'Could not load service requests', err instanceof Error ? err.message : 'Check the staff account and database connection.');
     } finally {
       setIsLoading(false);
     }
@@ -45,7 +46,7 @@ export const ServiceRequestsView: React.FC = () => {
       await api.updateServiceRequestStatus(id, status);
       if (status === 'CONFIRMED') {
         confetti({ particleCount: 40, spread: 60, origin: { y: 0.7 } });
-        showToast('success', 'Appointment Confirmed', 'Service slot confirmed and customer notified via SMS/Email.');
+        showToast('success', 'Appointment Confirmed', 'The service request status was updated.');
       } else {
         showToast('info', 'Status Updated', `Booking request marked as ${status}.`);
       }

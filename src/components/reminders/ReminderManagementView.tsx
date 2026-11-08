@@ -31,7 +31,7 @@ export const ReminderManagementView: React.FC = () => {
     stats
   } = useApp();
 
-  const [reminders, setReminders] = useState<(Reminder & { vehicleReg: string; vehicleModel: string; customerName: string; customerPhone: string; customerEmail: string })[]>([]);
+  const [reminders, setReminders] = useState<(Reminder & { vehicleReg: string; vehicleModel: string; customerName: string; customerPhone: string; customerEmail: string; priority?: string })[]>([]);
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [activeStatusTab, setActiveStatusTab] = useState<string>('ALL');
   const [categoryFilter, setCategoryFilter] = useState<string>('ALL');
@@ -47,7 +47,6 @@ export const ReminderManagementView: React.FC = () => {
     description: 'Vehicle is due for routine engine oil replacement, brake inspection, and general servicing.',
     dueDate: '2026-09-10',
     targetDaysBefore: 15,
-    channel: 'ALL' as any,
     priority: 'HIGH' as any
   });
 
@@ -86,24 +85,25 @@ export const ReminderManagementView: React.FC = () => {
 
   const handleDispatchNotification = async (reminder: any) => {
     try {
-      const result = await api.resendReminderNotification(reminder.id, reminder.channel || 'ALL');
-      confetti({ particleCount: 40, spread: 60, origin: { y: 0.7 } });
-      showToast(
-        'success',
-        'Notification Dispatched',
-        `Demo ${reminder.channel} reminder alert delivered to ${reminder.customerName} (${reminder.customerPhone}).`
-      );
+      const result = await api.resendReminderNotification(reminder.id);
+      const notification = result.notification;
+      if (notification?.status === 'SENT') {
+        confetti({ particleCount: 40, spread: 60, origin: { y: 0.7 } });
+        showToast('success', 'Email accepted by SMTP', 'The SMTP server accepted this message. Inbox delivery is not confirmed.');
+      } else {
+        showToast('error', 'Email not sent', notification?.deliveryNotes || 'SMTP did not accept this message. You can retry it from Notification Logs.');
+      }
       await loadReminders();
       await refreshStats();
 
       // Automatically preview the dispatched message
-      if (result.notification) {
+      if (notification) {
         openMessagePreview({
-          channel: result.notification.channel,
-          recipient: result.notification.recipient,
-          subject: result.notification.subject,
-          message: result.notification.message,
-          deliveryNotes: result.notification.deliveryNotes
+          channel: notification.channel,
+          recipient: notification.recipient,
+          subject: notification.subject,
+          message: notification.message,
+          deliveryNotes: notification.deliveryNotes
         });
       }
     } catch (err: any) {
@@ -130,7 +130,7 @@ export const ReminderManagementView: React.FC = () => {
     }
 
     try {
-      const { channel: _channel, priority: _priority, ...reminderData } = formData;
+      const { priority: _priority, ...reminderData } = formData;
       await api.createReminder({
         ...reminderData,
         showroomId: activeShowroomId
@@ -160,7 +160,7 @@ export const ReminderManagementView: React.FC = () => {
             Reminders & Alerts
           </h1>
           <p className="text-sm text-slate-500 mt-0.5">
-            Real-time due date tracking, maintenance scheduling, and multi-channel notification dispatch
+            Service, insurance, and PUC due dates with email reminders
           </p>
         </div>
 
@@ -273,7 +273,7 @@ export const ReminderManagementView: React.FC = () => {
                     {r.category === 'SERVICE' && <Wrench className="w-5 h-5 text-[#F07836]" />}
                     {r.category === 'INSURANCE' && <ShieldAlert className="w-5 h-5" />}
                     {r.category === 'PUC' && <FileText className="w-5 h-5" />}
-                    {r.category === 'GENERAL' && <BellRing className="w-5 h-5" />}
+                    {r.category === 'CUSTOM' && <BellRing className="w-5 h-5" />}
                   </div>
 
                   <div className="flex-1 min-w-0">
@@ -312,7 +312,7 @@ export const ReminderManagementView: React.FC = () => {
                       <span className="text-slate-400">&bull;</span>
                       <span className="font-semibold text-slate-800">Due Date: {r.dueDate}</span>
                       <span className="text-[#D95D1E] bg-[#FFF3EC] border border-[#FCD4BE] px-1.5 py-0.5 rounded font-mono text-[10px]">
-                        {r.channel}
+                        Email reminder
                       </span>
                     </div>
                   </div>
@@ -324,7 +324,7 @@ export const ReminderManagementView: React.FC = () => {
                   <button
                     onClick={() => handleDispatchNotification(r)}
                     className="px-3 py-2 rounded-xl bg-[#F07836] hover:bg-[#E06725] text-white text-xs font-bold flex items-center gap-1.5 shadow-sm shadow-[#F07836]/25 transition-all"
-                    title="Send instant SMS/Email notification alert"
+                    title="Send reminder email"
                   >
                     <Send className="w-3.5 h-3.5" />
                     <span>Send Alert</span>
@@ -449,16 +449,7 @@ export const ReminderManagementView: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Dispatch Channel</label>
-                  <select
-                    value={formData.channel}
-                    onChange={e => setFormData({ ...formData, channel: e.target.value as any })}
-                    className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#F07836] focus:border-[#F07836] focus:outline-none bg-white"
-                  >
-                    <option value="ALL">All (Email & SMS)</option>
-                    <option value="SMS">SMS Only</option>
-                    <option value="EMAIL">Email Only</option>
-                  </select>
+                  <div className="text-xs text-slate-500">Reminder notification delivery uses email only.</div>
                 </div>
               </div>
 

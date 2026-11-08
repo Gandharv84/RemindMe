@@ -1,13 +1,14 @@
 import { db } from '../db';
 import { notificationService } from './notificationService';
-import { Reminder, ReminderCategory, ReminderStatus, NotificationChannel } from '../../src/types';
-import { acquireReminderLock } from '../postgres';
+import { Reminder, ReminderCategory, ReminderStatus } from '../../src/types';
+import { acquireReminderLock } from '../prismaStore';
 
 export interface EngineRunSummary {
   evaluatedVehicles: number;
   newRemindersCreated: number;
   existingRemindersUpdated: number;
   notificationsDispatched: number;
+  notificationsFailed: number;
   logs: string[];
   timestamp: string;
 }
@@ -38,7 +39,7 @@ export class ReminderEngine {
   private async evaluate(referenceDateStr?: string): Promise<EngineRunSummary> {
     const releaseLock = await acquireReminderLock();
     if (!releaseLock) {
-      return { evaluatedVehicles: 0, newRemindersCreated: 0, existingRemindersUpdated: 0, notificationsDispatched: 0, logs: ['[ENGINE] Another instance is evaluating reminders.'], timestamp: new Date().toISOString() };
+      return { evaluatedVehicles: 0, newRemindersCreated: 0, existingRemindersUpdated: 0, notificationsDispatched: 0, notificationsFailed: 0, logs: ['[ENGINE] Another instance is evaluating reminders.'], timestamp: new Date().toISOString() };
     }
     try {
       return await this.evaluateWithLock(referenceDateStr);
@@ -52,6 +53,7 @@ export class ReminderEngine {
     let newRemindersCount = 0;
     let updatedRemindersCount = 0;
     let notificationsCount = 0;
+    let notificationsFailedCount = 0;
 
     const vehicles = db.vehicles.filter(v => v.status === 'ACTIVE');
     logs.push(`[ENGINE] Starting Reminder Engine evaluation for ${vehicles.length} active vehicles.`);
@@ -108,9 +110,7 @@ export class ReminderEngine {
             newRemindersCount++;
             logs.push(`[SERVICE REMINDER CREATED] ${vehicle.registrationNumber} (${status}) -> Due: ${vehicle.nextServiceDate}`);
 
-            // Dispatch notification (SMS and/or Email according to customer preference)
-            const channel: NotificationChannel = customer.preferredChannel === 'SMS' ? 'SMS' : 'EMAIL';
-            const template = notificationService.generateTemplate('SERVICE', channel, {
+            const template = notificationService.generateTemplate('SERVICE', {
               customerName: customer.name,
               vehicleReg: vehicle.registrationNumber,
               brandModel: `${vehicle.brand} ${vehicle.model}`,
@@ -119,18 +119,16 @@ export class ReminderEngine {
               showroomName
             });
 
-            await notificationService.send({
-              reminderId: newReminder.id,
-              vehicleId: vehicle.id,
-              customerId: customer.id,
-              showroomId: vehicle.showroomId,
-              type: 'SERVICE_REMINDER',
-              channel,
-              recipient: channel === 'SMS' ? customer.phone : customer.email,
-              subject: template.subject,
-              message: template.message
+            const notification = await notificationService.send({
+              reminderId: newReminder.id, vehicleId: vehicle.id, customerId: customer.id, showroomId: vehicle.showroomId,
+              type: 'SERVICE_REMINDER', channel: 'EMAIL', recipient: customer.email,
+              subject: template.subject, message: template.message
             });
-            notificationsCount++;
+            if (notification.status === 'SENT') notificationsCount++;
+            else {
+              notificationsFailedCount++;
+              logs.push(`[SERVICE EMAIL FAILED] ${vehicle.registrationNumber}: ${notification.deliveryNotes || 'SMTP send failed.'}`);
+            }
           } else {
             // Update existing reminder status if changed (e.g. from UPCOMING to DUE_TODAY or OVERDUE)
             if (existing.status !== 'COMPLETED' && existing.status !== status) {
@@ -183,8 +181,7 @@ export class ReminderEngine {
             newRemindersCount++;
             logs.push(`[INSURANCE REMINDER CREATED] ${vehicle.registrationNumber} (${status}) -> Expiry: ${vehicle.insuranceExpiryDate}`);
 
-            const channel: NotificationChannel = customer.preferredChannel === 'SMS' ? 'SMS' : 'EMAIL';
-            const template = notificationService.generateTemplate('INSURANCE', channel, {
+            const template = notificationService.generateTemplate('INSURANCE', {
               customerName: customer.name,
               vehicleReg: vehicle.registrationNumber,
               brandModel: `${vehicle.brand} ${vehicle.model}`,
@@ -193,18 +190,16 @@ export class ReminderEngine {
               showroomName
             });
 
-            await notificationService.send({
-              reminderId: newReminder.id,
-              vehicleId: vehicle.id,
-              customerId: customer.id,
-              showroomId: vehicle.showroomId,
-              type: 'INSURANCE_RENEWAL',
-              channel,
-              recipient: channel === 'SMS' ? customer.phone : customer.email,
-              subject: template.subject,
-              message: template.message
+            const notification = await notificationService.send({
+              reminderId: newReminder.id, vehicleId: vehicle.id, customerId: customer.id, showroomId: vehicle.showroomId,
+              type: 'INSURANCE_RENEWAL', channel: 'EMAIL', recipient: customer.email,
+              subject: template.subject, message: template.message
             });
-            notificationsCount++;
+            if (notification.status === 'SENT') notificationsCount++;
+            else {
+              notificationsFailedCount++;
+              logs.push(`[INSURANCE EMAIL FAILED] ${vehicle.registrationNumber}: ${notification.deliveryNotes || 'SMTP send failed.'}`);
+            }
           } else {
             if (existing.status !== 'COMPLETED' && existing.status !== status) {
               await db.updateReminder(existing.id, { status, title });
@@ -256,8 +251,7 @@ export class ReminderEngine {
             newRemindersCount++;
             logs.push(`[PUC REMINDER CREATED] ${vehicle.registrationNumber} (${status}) -> Expiry: ${vehicle.pucExpiryDate}`);
 
-            const channel: NotificationChannel = 'SMS';
-            const template = notificationService.generateTemplate('PUC', channel, {
+            const template = notificationService.generateTemplate('PUC', {
               customerName: customer.name,
               vehicleReg: vehicle.registrationNumber,
               brandModel: `${vehicle.brand} ${vehicle.model}`,
@@ -266,18 +260,16 @@ export class ReminderEngine {
               showroomName
             });
 
-            await notificationService.send({
-              reminderId: newReminder.id,
-              vehicleId: vehicle.id,
-              customerId: customer.id,
-              showroomId: vehicle.showroomId,
-              type: 'PUC_EXPIRY',
-              channel,
-              recipient: customer.phone,
-              subject: template.subject,
-              message: template.message
+            const notification = await notificationService.send({
+              reminderId: newReminder.id, vehicleId: vehicle.id, customerId: customer.id, showroomId: vehicle.showroomId,
+              type: 'PUC_EXPIRY', channel: 'EMAIL', recipient: customer.email,
+              subject: template.subject, message: template.message
             });
-            notificationsCount++;
+            if (notification.status === 'SENT') notificationsCount++;
+            else {
+              notificationsFailedCount++;
+              logs.push(`[PUC EMAIL FAILED] ${vehicle.registrationNumber}: ${notification.deliveryNotes || 'SMTP send failed.'}`);
+            }
           } else {
             if (existing.status !== 'COMPLETED' && existing.status !== status) {
               await db.updateReminder(existing.id, { status, title });
@@ -289,13 +281,14 @@ export class ReminderEngine {
       }
     }
 
-    logs.push(`[ENGINE FINISHED] Evaluation complete. Created: ${newRemindersCount}, Updated: ${updatedRemindersCount}, Dispatched: ${notificationsCount}`);
+    logs.push(`[ENGINE FINISHED] Evaluation complete. Created: ${newRemindersCount}, Updated: ${updatedRemindersCount}, SMTP accepted: ${notificationsCount}, Failed: ${notificationsFailedCount}`);
 
     return {
       evaluatedVehicles: vehicles.length,
       newRemindersCreated: newRemindersCount,
       existingRemindersUpdated: updatedRemindersCount,
       notificationsDispatched: notificationsCount,
+      notificationsFailed: notificationsFailedCount,
       logs,
       timestamp: new Date().toISOString()
     };

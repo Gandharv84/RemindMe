@@ -75,7 +75,10 @@ export const DashboardView: React.FC = () => {
 
   const handleQuickResend = async (reminderId: string) => {
     try {
-      await api.resendReminderNotification(reminderId, 'ALL');
+      const result = await api.resendReminderNotification(reminderId);
+      if (result.notification?.status !== 'SENT') {
+        console.warn('Reminder email was not accepted by SMTP', result.notification?.deliveryNotes);
+      }
       await refreshStats();
       await loadDashboardData();
     } catch (err) {
@@ -236,14 +239,14 @@ export const DashboardView: React.FC = () => {
           className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all cursor-pointer group"
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500">Alerts Delivered</span>
+            <span className="text-xs font-semibold text-slate-500">Emails Accepted by SMTP</span>
             <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-105 transition-transform">
               <Mail className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-3 flex items-baseline justify-between">
             <span className="text-2xl font-extrabold text-slate-900">{stats?.notificationsSent ?? 0}</span>
-            <span className="text-[11px] font-medium text-emerald-600">SMS & Email</span>
+            <span className="text-[11px] font-medium text-emerald-600">Email only</span>
           </div>
         </div>
       </div>
@@ -504,7 +507,7 @@ export const DashboardView: React.FC = () => {
                   <Mail className="w-6 h-6 text-slate-300 mb-1" />
                   <p className="font-medium text-slate-600">No alerts dispatched yet.</p>
                   <p className="text-slate-400 text-[11px]">
-                    Dispatched notifications and gateway logs will appear here.
+                    Email attempts and SMTP responses will appear here.
                   </p>
                 </div>
               ) : (

@@ -29,11 +29,13 @@ export type ReminderCategory = 'SERVICE' | 'INSURANCE' | 'PUC' | 'DOCUMENT' | 'C
 
 export type ReminderStatus = 'UPCOMING' | 'DUE_TODAY' | 'OVERDUE' | 'COMPLETED' | 'CANCELLED';
 
-export type NotificationChannel = 'EMAIL' | 'SMS' | 'WHATSAPP';
+export type NotificationChannel = 'EMAIL';
 
-export type NotificationStatus = 'SENT' | 'DELIVERED' | 'FAILED' | 'PENDING';
+export type NotificationRecordChannel = NotificationChannel | 'SMS' | 'WHATSAPP';
 
-export type NotificationMode = 'DEMO_SANDBOX' | 'LIVE';
+export type NotificationStatus = 'SENT' | 'FAILED' | 'PENDING';
+
+export type NotificationMode = 'LEGACY' | 'LIVE';
 
 export interface Showroom {
   id: string;
@@ -75,7 +77,7 @@ export interface Customer {
   city: string;
   pincode: string;
   status: 'ACTIVE' | 'INACTIVE';
-  preferredChannel: 'ALL' | 'EMAIL' | 'SMS';
+  preferredChannel: 'EMAIL';
   createdAt: string;
   updatedAt: string;
 }
@@ -195,7 +197,8 @@ export interface Notification {
   customerId: string;
   showroomId: string;
   type: string;
-  channel: NotificationChannel;
+  // Historical records may contain retired channels; new sends use NotificationChannel only.
+  channel: NotificationRecordChannel;
   recipient: string;
   subject: string;
   message: string;
@@ -203,6 +206,7 @@ export interface Notification {
   mode: NotificationMode;
   sentAt: string;
   deliveryNotes?: string;
+  attemptCount?: number;
   createdAt: string;
 }
 

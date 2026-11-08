@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { Car, Lock, Mail, AlertCircle, ArrowRight, UserCheck, Phone, Shield } from 'lucide-react';
+import { Car, Lock, Mail, AlertCircle, ArrowRight, UserCheck, Phone, Shield, Eye, EyeOff } from 'lucide-react';
 
 export const LoginView: React.FC = () => {
   const { login, isLoading } = useAuth();
   const [loginMode, setLoginMode] = useState<'EMPLOYEE' | 'CUSTOMER'>('EMPLOYEE');
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [customerIdentifier, setCustomerIdentifier] = useState('');
   const [error, setError] = useState<string | null>(null);
 
@@ -117,13 +118,22 @@ export const LoginView: React.FC = () => {
                 <div className="relative">
                   <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                   <input
-                    type="password"
+                    type={showPassword ? 'text' : 'password'}
                     required
                     value={password}
                     onChange={e => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full pl-10 pr-4 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#F07836] focus:border-[#F07836] focus:bg-white transition-all text-slate-900 font-medium"
+                    className="w-full pl-10 pr-10 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#F07836] focus:border-[#F07836] focus:bg-white transition-all text-slate-900 font-medium"
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(visible => !visible)}
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    aria-pressed={showPassword}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F07836] rounded p-1"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
                 </div>
               </div>
             </>
@@ -149,7 +159,16 @@ export const LoginView: React.FC = () => {
               <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mt-4 mb-1.5">Password</label>
               <div className="relative">
                 <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                <input type="password" required minLength={10} value={password} onChange={e => setPassword(e.target.value)} placeholder="At least 10 characters" className="w-full pl-10 pr-4 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#F07836] focus:border-[#F07836] focus:bg-white transition-all text-slate-900 font-medium" />
+                <input type={showPassword ? 'text' : 'password'} required minLength={10} value={password} onChange={e => setPassword(e.target.value)} placeholder="At least 10 characters" className="w-full pl-10 pr-10 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#F07836] focus:border-[#F07836] focus:bg-white transition-all text-slate-900 font-medium" />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(visible => !visible)}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  aria-pressed={showPassword}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F07836] rounded p-1"
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
               </div>
             </div>
           )}
@@ -170,39 +189,11 @@ export const LoginView: React.FC = () => {
           </button>
         </form>
 
-        {/* Demo Quick Access Helper */}
         <div className="mt-6 pt-5 border-t border-slate-100">
-          <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2 text-center">
-            Demo Quick Access
-          </p>
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                setLoginMode('EMPLOYEE');
-                setIdentifier('admin@dealership.com');
-                setPassword('Admin@123456');
-                setError(null);
-              }}
-              className="px-2.5 py-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-[#FFF3EC] hover:border-[#F07836] text-[11px] font-medium text-slate-700 hover:text-[#F07836] transition-colors text-center cursor-pointer"
-            >
-              Fill Staff Admin
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setLoginMode('CUSTOMER');
-                setCustomerIdentifier('mahesh@example.com');
-                setPassword('Customer@123456');
-                setError(null);
-              }}
-              className="px-2.5 py-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-[#FFF3EC] hover:border-[#F07836] text-[11px] font-medium text-slate-700 hover:text-[#F07836] transition-colors text-center cursor-pointer"
-            >
-              Fill Customer (Mahesh)
-            </button>
-          </div>
-          <p className="text-[10px] text-slate-400 text-center mt-2">
-            Default Admin: <code className="text-slate-600">admin@dealership.com / Admin@123456</code>
+          <p className="text-[10px] text-slate-500 text-center leading-relaxed">
+            {loginMode === 'EMPLOYEE'
+              ? 'Use the admin account created for this database. SEED_ADMIN_EMAIL and SEED_ADMIN_PASSWORD apply only when the first admin is created; changing them does not update an existing account.'
+              : 'Use the customer portal credentials provided by your dealership.'}
           </p>
         </div>
       </div>

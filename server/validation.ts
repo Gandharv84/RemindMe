@@ -7,7 +7,7 @@ const enumValues = {
   reminderCategory: ['SERVICE', 'INSURANCE', 'PUC', 'DOCUMENT', 'CUSTOM'],
   reminderStatus: ['UPCOMING', 'DUE_TODAY', 'OVERDUE', 'COMPLETED', 'CANCELLED'],
   requestStatus: ['PENDING', 'CONFIRMED', 'REJECTED', 'COMPLETED'],
-  channel: ['EMAIL', 'SMS', 'WHATSAPP']
+  channel: ['EMAIL']
 } as const;
 
 export function isRecord(value: unknown): value is Record<string, unknown> {

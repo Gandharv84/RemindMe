@@ -134,7 +134,7 @@ apiRouter.get('/dashboard/stats', (req: Request, res: Response) => {
     pucExpiringSoon,
     overdueReminders,
     completedReminders,
-    notificationsSent: notifications.length,
+    notificationsSent: notifications.filter(notification => notification.status === 'SENT').length,
     upcomingRemindersCount,
     monthlyRevenueEstimate
   };
@@ -180,8 +180,8 @@ apiRouter.get('/customers/:id', (req: Request, res: Response) => {
 });
 
 apiRouter.post('/customers', async (req: Request, res: Response) => {
-  const { name, phone, email, address = '', city = '', pincode = '', preferredChannel = 'ALL', password } = req.body || {};
-  if (!isRecord(req.body) || !hasOnlyKeys(req.body, ['name','phone','email','address','city','pincode','preferredChannel','password','showroomId']) || !isText(name, 120) || !isPhone(phone) || (email && !isEmail(email)) || !['ALL','EMAIL','SMS'].includes(preferredChannel) || !isOptionalText(address) || !isOptionalText(city, 100) || !isOptionalText(pincode, 20) || !isValidPassword(password)) {
+  const { name, phone, email, address = '', city = '', pincode = '', preferredChannel = 'EMAIL', password } = req.body || {};
+  if (!isRecord(req.body) || !hasOnlyKeys(req.body, ['name','phone','email','address','city','pincode','preferredChannel','password','showroomId']) || !isText(name, 120) || !isPhone(phone) || (email && !isEmail(email)) || preferredChannel !== 'EMAIL' || !isOptionalText(address) || !isOptionalText(city, 100) || !isOptionalText(pincode, 20) || !isValidPassword(password)) {
     return res.status(400).json({ error: 'Invalid customer details; set a password of at least 10 characters' });
   }
   const targetShowroom = bodyShowroom(req, typeof req.body.showroomId === 'string' ? req.body.showroomId : undefined);
@@ -189,7 +189,7 @@ apiRouter.post('/customers', async (req: Request, res: Response) => {
   if (email && db.customers.some(c => c.email.toLowerCase() === email.trim().toLowerCase())) return res.status(409).json({ error: 'Email is already registered' });
   const customer = await db.addCustomer({
     showroomId: targetShowroom, name: name.trim(), phone: phone.trim(), email: (email || '').trim().toLowerCase(),
-    address: address || '', city: city || '', pincode: pincode || '', status: 'ACTIVE', preferredChannel: preferredChannel as 'ALL' | 'EMAIL' | 'SMS',
+    address: address || '', city: city || '', pincode: pincode || '', status: 'ACTIVE', preferredChannel: 'EMAIL',
     passwordHash: await hashPassword(password)
   });
   res.status(201).json(safeCustomer(customer));
@@ -199,7 +199,7 @@ apiRouter.put('/customers/:id', async (req: Request, res: Response) => {
   const current = db.customers.find(c => c.id === req.params.id);
   const allowed = ['name','phone','email','address','city','pincode','status','preferredChannel'];
   if (!current || !belongsToShowroom(req, current.showroomId)) return res.status(404).json({ error: 'Customer not found' });
-  if (!isRecord(req.body) || !hasOnlyKeys(req.body, allowed) || Object.keys(req.body).length === 0 || ('name' in req.body && !isText(req.body.name,120)) || ('phone' in req.body && !isPhone(req.body.phone)) || ('email' in req.body && req.body.email !== '' && !isEmail(req.body.email)) || ('address' in req.body && !isOptionalText(req.body.address)) || ('city' in req.body && !isOptionalText(req.body.city,100)) || ('pincode' in req.body && !isOptionalText(req.body.pincode,20)) || ('status' in req.body && !['ACTIVE','INACTIVE'].includes(req.body.status as string)) || ('preferredChannel' in req.body && !['ALL','EMAIL','SMS'].includes(req.body.preferredChannel as string))) return res.status(400).json({ error: 'Invalid customer update' });
+  if (!isRecord(req.body) || !hasOnlyKeys(req.body, allowed) || Object.keys(req.body).length === 0 || ('name' in req.body && !isText(req.body.name,120)) || ('phone' in req.body && !isPhone(req.body.phone)) || ('email' in req.body && req.body.email !== '' && !isEmail(req.body.email)) || ('address' in req.body && !isOptionalText(req.body.address)) || ('city' in req.body && !isOptionalText(req.body.city,100)) || ('pincode' in req.body && !isOptionalText(req.body.pincode,20)) || ('status' in req.body && !['ACTIVE','INACTIVE'].includes(req.body.status as string)) || ('preferredChannel' in req.body && req.body.preferredChannel !== 'EMAIL')) return res.status(400).json({ error: 'Invalid customer update' });
   if (typeof req.body.email === 'string' && req.body.email && db.customers.some(c => c.id !== current.id && c.email.toLowerCase() === req.body.email!.toString().toLowerCase())) return res.status(409).json({ error: 'Email is already registered' });
   const updated = await db.updateCustomer(req.params.id, req.body);
   if (!updated) return res.status(404).json({ error: 'Customer not found' });
@@ -646,7 +646,7 @@ apiRouter.patch('/reminders/:id/status', async (req: Request, res: Response) => 
   res.json(updated);
 });
 
-// Manually trigger SMS / Email notification for a reminder
+// Manually trigger an email notification for a reminder.
 apiRouter.post('/reminders/:id/resend', async (req: Request, res: Response) => {
   const reminder = db.reminders.find(r => r.id === req.params.id);
   if (!reminder || !belongsToShowroom(req, reminder.showroomId)) return res.status(404).json({ error: 'Reminder not found' });
@@ -659,14 +659,23 @@ apiRouter.post('/reminders/:id/resend', async (req: Request, res: Response) => {
     return res.status(400).json({ error: 'Vehicle or customer not found for this reminder' });
   }
 
-  const { channel = 'ALL' } = req.body || {};
+  const { channel = 'EMAIL' } = req.body || {};
   if (req.body !== undefined && (!isRecord(req.body) || !hasOnlyKeys(req.body, ['channel']))) return res.status(400).json({ error: 'Invalid notification request' });
-  if (!['ALL','EMAIL','SMS'].includes(channel)) return res.status(400).json({ error: 'Invalid notification channel' });
-  const dispatched: any[] = [];
+  if (!isEnum('channel', channel)) return res.status(400).json({ error: 'Unsupported notification channel. Only EMAIL is supported.' });
+
+  const type = reminder.category === 'SERVICE'
+    ? 'SERVICE_REMINDER'
+    : reminder.category === 'INSURANCE'
+      ? 'INSURANCE_RENEWAL'
+      : reminder.category === 'PUC'
+        ? 'PUC_EXPIRY'
+        : `${reminder.category}_REMINDER`;
+  const existing = db.notifications.find(notification => notification.reminderId === reminder.id && notification.type === type);
+  if (existing?.status === 'SENT') return res.status(409).json({ error: 'This reminder already has a successful SMTP send.', notification: existing });
+  if (existing?.status === 'PENDING') return res.status(409).json({ error: 'An email for this reminder is already being processed.' });
 
   const template = notificationService.generateTemplate(
     reminder.category as any,
-    'EMAIL',
     {
       customerName: customer.name,
       vehicleReg: vehicle.registrationNumber,
@@ -677,56 +686,49 @@ apiRouter.post('/reminders/:id/resend', async (req: Request, res: Response) => {
     }
   );
 
-  if (channel === 'ALL' || channel === 'EMAIL') {
-    const notif = await notificationService.send({
+  const notification = existing?.status === 'FAILED'
+    ? await notificationService.retry(existing.id)
+    : await notificationService.send({
       reminderId: reminder.id,
       vehicleId: vehicle.id,
       customerId: customer.id,
       showroomId: reminder.showroomId,
-      type: `${reminder.category}_REMINDER`,
+      type,
       channel: 'EMAIL',
       recipient: customer.email,
       subject: template.subject,
       message: template.message
     });
-    dispatched.push(notif);
-  }
 
-  if (channel === 'ALL' || channel === 'SMS') {
-    const smsTemplate = notificationService.generateTemplate(
-      reminder.category as any,
-      'SMS',
-      {
-        customerName: customer.name,
-        vehicleReg: vehicle.registrationNumber,
-        brandModel: `${vehicle.brand} ${vehicle.model}`,
-        dueDate: reminder.dueDate,
-        daysRemaining: Math.round((new Date(reminder.dueDate).getTime() - new Date().getTime()) / (1000 * 3600 * 24)),
-        showroomName: showroom ? showroom.name : 'Dealership'
-      }
-    );
-
-    const notif = await notificationService.send({
-      reminderId: reminder.id,
-      vehicleId: vehicle.id,
-      customerId: customer.id,
-      showroomId: reminder.showroomId,
-      type: `${reminder.category}_REMINDER`,
-      channel: 'SMS',
-      recipient: customer.phone,
-      subject: smsTemplate.subject,
-      message: smsTemplate.message
-    });
-    dispatched.push(notif);
-  }
-
-  res.json({ message: 'Notifications generated and logged successfully', dispatched });
+  res.json({
+    message: notification.status === 'SENT' ? 'SMTP accepted the email; inbox delivery is not confirmed.' : notification.deliveryNotes,
+    notification,
+    dispatched: [notification]
+  });
 });
 
 // --- Notification Routes ---
+apiRouter.get('/notifications/status', (_req: Request, res: Response) => {
+  res.json(notificationService.getSmtpStatus());
+});
+
 apiRouter.get('/notifications', (req: Request, res: Response) => {
   const showroomId = showroomScope(req, req.query.showroomId as string | undefined);
   res.json(db.getNotifications(showroomId));
+});
+
+apiRouter.post('/notifications/:id/retry', async (req: Request, res: Response) => {
+  const current = db.notifications.find(notification => notification.id === req.params.id);
+  if (!current || !belongsToShowroom(req, current.showroomId)) return res.status(404).json({ error: 'Notification not found' });
+  if (!isRecord(req.body) || Object.keys(req.body).length > 0) return res.status(400).json({ error: 'Invalid retry request' });
+  if (current.status !== 'FAILED' || current.channel !== 'EMAIL') return res.status(409).json({ error: 'Only failed email notifications can be retried.' });
+
+  try {
+    const notification = await notificationService.retry(current.id);
+    res.json({ notification });
+  } catch (error) {
+    res.status(409).json({ error: error instanceof Error ? error.message : 'Notification could not be retried.' });
+  }
 });
 
 apiRouter.post('/notifications/send-direct', async (req: Request, res: Response) => {
@@ -736,20 +738,20 @@ apiRouter.post('/notifications/send-direct', async (req: Request, res: Response)
 
   const customer = db.customers.find(c => c.id === customerId);
   if (!customer || !belongsToShowroom(req, customer.showroomId)) return res.status(404).json({ error: 'Customer not found' });
-  if (!isEnum('channel',channel || 'SMS') || !isText(subject || 'Notice from Dealership',200) || !isText(message || 'Hello, this is a notice regarding your vehicle service.',2000) || (vehicleId && !db.vehicles.some(v => v.id === vehicleId && v.customerId === customer.id))) return res.status(400).json({ error: 'Invalid notification details' });
+  if (!isEnum('channel',channel ?? 'EMAIL') || !isText(subject || 'Notice from Dealership',200) || !isText(message || 'Hello, this is a notice regarding your vehicle service.',2000) || (vehicleId && !db.vehicles.some(v => v.id === vehicleId && v.customerId === customer.id))) return res.status(400).json({ error: 'Invalid notification details. Only EMAIL is supported.' });
 
   const notif = await notificationService.send({
     vehicleId: vehicleId || '',
     customerId: customer.id,
     showroomId: customer.showroomId,
     type: 'CUSTOM_ALERT',
-    channel: channel || 'SMS',
-    recipient: channel === 'EMAIL' ? customer.email : customer.phone,
+    channel: 'EMAIL',
+    recipient: customer.email,
     subject: subject || 'Notice from Dealership',
     message: message || 'Hello, this is a notice regarding your vehicle service.'
   });
 
-  res.status(201).json(notif);
+  res.status(201).json({ notification: notif });
 });
 
 // --- Reminder Engine Trigger Route ---

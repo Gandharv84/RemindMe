@@ -12,8 +12,10 @@ import {
   initialShowrooms
 } from './seedData';
 import { hashPassword } from './security';
-import { acquireSingleInstanceLock, deleteDemoData, loadCollection, migrateAndSeed, upsertRecord, type CollectionName, type PersistedRecord } from './postgres';
+import { acquireSingleInstanceLock, connectPrisma, deleteDemoData, loadCollection, seedInitialData, upsertRecord, type CollectionName, type PersistedRecord } from './prismaStore';
+import { importLegacyAccounts } from './legacyImport';
 import type { CustomerAccount, EmployeeAccount } from './models';
+import { resolveDatabaseMode } from './databaseMode';
 
 // PostgreSQL-backed record store with an in-process read cache.
 class RemindMeDatabase {
@@ -34,11 +36,15 @@ class RemindMeDatabase {
   }
 
   public async initialize() {
-    const seedEmail = (process.env.SEED_ADMIN_EMAIL || 'admin@dealership.com').trim().toLowerCase();
-    const seedPassword = process.env.SEED_ADMIN_PASSWORD || 'Admin@123456';
+    const mode = resolveDatabaseMode();
+    const seedEmail = process.env.SEED_ADMIN_EMAIL?.trim().toLowerCase();
+    const seedPassword = process.env.SEED_ADMIN_PASSWORD;
     const seedName = process.env.SEED_ADMIN_NAME || 'Dealership Admin';
+    if (Boolean(seedEmail) !== Boolean(seedPassword)) {
+      throw new Error('Set both SEED_ADMIN_EMAIL and SEED_ADMIN_PASSWORD to seed an initial admin account.');
+    }
 
-    const defaultAdmin: EmployeeAccount = {
+    const defaultAdmin: EmployeeAccount | undefined = seedEmail && seedPassword ? {
       id: 'emp-admin-01',
       showroomId: initialShowrooms[0]?.id || 'sh-01',
       name: seedName,
@@ -51,29 +57,37 @@ class RemindMeDatabase {
       active: true,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
-    };
+    } : undefined;
 
-    if (process.env.DATABASE_URL) {
+    if (mode === 'POSTGRES') {
       try {
         console.log('[RemindMe] Connecting to PostgreSQL database...');
-        await migrateAndSeed({ showrooms: initialShowrooms }, defaultAdmin);
+        await connectPrisma();
         await acquireSingleInstanceLock();
+        await seedInitialData(initialShowrooms);
+        const imported = await importLegacyAccounts();
+        if (imported.employees || imported.customers) {
+          console.log(`[RemindMe] Imported ${imported.employees} legacy employees and ${imported.customers} legacy customers; source rows remain intact.`);
+        }
+        if (Object.keys(imported.remainingLegacyRows).length) {
+          console.warn('[RemindMe] Legacy public-domain records were preserved but not converted to app payloads:', imported.remainingLegacyRows);
+        }
+        await seedInitialData([], defaultAdmin);
         await this.loadCache();
         console.log('[RemindMe] PostgreSQL connected and cached successfully.');
         return;
       } catch (err) {
-        console.warn('[RemindMe] PostgreSQL connection failed. Falling back to in-memory store:', err);
+        throw new Error('Prisma/PostgreSQL initialization failed. In-memory fallback is disabled; apply Prisma migrations and check DATABASE_URL and database availability.', { cause: err });
       }
-    } else {
-      console.warn('[RemindMe] DATABASE_URL not configured. Running with in-memory store (mock active).');
     }
 
+    console.warn('[RemindMe] Explicit in-memory demo mode enabled. Changes will not persist across restarts or server instances.');
     await this.seedInMemoryData(defaultAdmin);
   }
 
-  private async seedInMemoryData(admin: EmployeeAccount) {
+  private async seedInMemoryData(admin?: EmployeeAccount) {
     this.showrooms = structuredClone(initialShowrooms);
-    this.employees = [admin];
+    this.employees = admin ? [admin] : [];
 
     // Seed a service advisor employee
     const advisorPasswordHash = await hashPassword('Advisor@123456');
@@ -105,7 +119,7 @@ class RemindMeDatabase {
       city: 'Mumbai',
       pincode: '400020',
       status: 'ACTIVE',
-      preferredChannel: 'ALL',
+      preferredChannel: 'EMAIL',
       passwordHash: customerPasswordHash,
       createdAt: new Date(Date.now() - 90 * 86400000).toISOString(),
       updatedAt: new Date().toISOString()
@@ -236,26 +250,8 @@ class RemindMeDatabase {
       }
     ];
 
-    // Seed demo notification history
-    this.notifications = [
-      {
-        id: 'notif-demo-01',
-        reminderId: 'rem-demo-01',
-        vehicleId: demoVehicle.id,
-        customerId: demoCustomer.id,
-        showroomId: this.showrooms[0].id,
-        type: 'SERVICE',
-        channel: 'EMAIL',
-        recipient: demoCustomer.email,
-        subject: `Upcoming Service Reminder: ${demoVehicle.brand} ${demoVehicle.model} (${demoVehicle.registrationNumber})`,
-        message: `Dear ${demoCustomer.name}, your periodic vehicle service is coming up on ${demoVehicle.nextServiceDate}.`,
-        status: 'DELIVERED',
-        mode: 'DEMO_SANDBOX',
-        sentAt: new Date(Date.now() - 2 * 86400000).toISOString(),
-        deliveryNotes: '[DEMO SMTP RELAY] Sent via Dealership Mail Hub. Response: 250 2.0.0 Ok',
-        createdAt: new Date(Date.now() - 2 * 86400000).toISOString()
-      }
-    ];
+    // Never seed a notification as sent or delivered; history is populated only by real SMTP attempts.
+    this.notifications = [];
 
     // Seed demo service request
     this.serviceRequests = [
@@ -276,7 +272,7 @@ class RemindMeDatabase {
   private async loadCache() {
     this.showrooms = await loadCollection('showrooms');
     this.employees = await loadCollection('employees');
-    this.customers = await loadCollection('customers');
+    this.customers = (await loadCollection<CustomerAccount>('customers')).map(customer => ({ ...customer, preferredChannel: 'EMAIL' as const }));
     this.vehicles = await loadCollection('vehicles');
     this.services = await loadCollection('services');
     this.insurancePolicies = await loadCollection('insurancePolicies');
@@ -389,7 +385,7 @@ class RemindMeDatabase {
       id: 'cust-' + Date.now().toString(36) + Math.random().toString(36).substring(2, 5),
       customerCode: `CUST-${new Date().getFullYear()}-${String(count).padStart(3, '0')}`,
       status: data.status || 'ACTIVE',
-      preferredChannel: data.preferredChannel || 'ALL',
+      preferredChannel: 'EMAIL',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
@@ -767,6 +763,14 @@ class RemindMeDatabase {
     this.notifications.unshift(newNotif);
     await this.persist('notifications', newNotif);
     return newNotif;
+  }
+
+  public async updateNotification(id: string, updates: Partial<Notification>): Promise<Notification | undefined> {
+    const index = this.notifications.findIndex(notification => notification.id === id);
+    if (index === -1) return undefined;
+    this.notifications[index] = { ...this.notifications[index], ...updates };
+    await this.persist('notifications', this.notifications[index]);
+    return this.notifications[index];
   }
 
   // --- Service Request Operations (Customer Portal) ---

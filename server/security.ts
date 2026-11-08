@@ -1,6 +1,7 @@
 import { createHmac, randomBytes, scrypt as scryptCallback, timingSafeEqual } from 'node:crypto';
 import { promisify } from 'node:util';
 import type { NextFunction, Request, Response } from 'express';
+import bcrypt from 'bcryptjs';
 import type { Role } from '../src/types';
 
 const scrypt = promisify(scryptCallback);
@@ -32,6 +33,9 @@ export async function hashPassword(password: string): Promise<string> {
 
 export async function verifyPassword(password: string, encoded: string | undefined): Promise<boolean> {
   if (!encoded || typeof password !== 'string') return false;
+  if (/^\$2[aby]\$\d{2}\$/.test(encoded)) {
+    try { return await bcrypt.compare(password, encoded); } catch { return false; }
+  }
   const [scheme, salt, expectedHex, extra] = encoded.split('$');
   if (scheme !== 'scrypt' || !salt || !expectedHex || extra) return false;
   try {

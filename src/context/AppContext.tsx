@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { api } from '../services/api';
-import { DashboardStats } from '../types';
+import { DashboardStats, NotificationRecordChannel } from '../types';
 import { useAuth } from './AuthContext';
 
 export interface ToastMessage {
@@ -12,7 +12,7 @@ export interface ToastMessage {
 
 export interface MessagePreviewData {
   isOpen: boolean;
-  channel: 'EMAIL' | 'SMS' | 'WHATSAPP';
+  channel: NotificationRecordChannel;
   recipient: string;
   subject: string;
   message: string;
